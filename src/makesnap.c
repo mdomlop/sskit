@@ -33,7 +33,7 @@ int getopt(int argc, char *const argv[], const char *optstring);
 extern int optind, optopt;
 
 char timestamp[80];
-char subv_path[PATH_MAX];  // Path to subvolume
+char *subv_path = NULL;  // Path to subvolume
 char store_path[PATH_MAX];  // Path to subvolume/.snapshots
 char snap_path[PATH_MAX];  // Path to subvolume/.snapshots/timestamp
 
@@ -219,7 +219,10 @@ int restore_snapshot (char * index)
 	if (is_integer(index))
 		i = atoi(index);
 	else
+	{
+		fprintf(stderr, "The selected snapshot does not exist.\n");
 		return 1;
+	}
 
 	if (i >= snapls_c)
 	{
@@ -328,16 +331,14 @@ int create_snapshot(int force, char * quota)
 	//printf("%s\n", subv_path);
 	//printf("%s\n", store_path);
 	//printf("%s\n", snap_path);
-	if (check_if_subvol(subv_path))
-	{
-		puts("No es un subvolume");
-		return 1;
-	}
 
 	if (is_integer(quota))
 		quota_int = atoi(quota);
 	else
+	{
+		fprintf(stderr, "Invalid quota.\n");
 		return 1;
+	}
 
 	if(create_store())
 		return 1;
@@ -361,6 +362,8 @@ int main(int argc, char **argv)
 {
 	char *defquota = DEFQUOTA;
 
+	int hflag = 0;
+	int vflag = 0;
 	int cflag = 0;
 	int fflag = 0;
 	int lflag = 0;
@@ -368,17 +371,11 @@ int main(int argc, char **argv)
 	char *qvalue = NULL;
 	char *rvalue = NULL;
 	char *dvalue = NULL;
-	char *subvolume = NULL;
+	//char *subvolume = NULL;
 
 	char *env_quota = getenv("MAKESNAPQUOTA");
 
 	char cwd[PATH_MAX];
-	if (getcwd(cwd, sizeof(cwd)) == NULL)  // cwd must be current directory
-	{
-		perror("Can not get the current working directory.\n");
-		return 1;
-	}
-
 
 	time_t now;
 	struct tm ts;
@@ -401,11 +398,11 @@ int main(int argc, char **argv)
 		switch (c)
 		{
 			case 'h':
-				help(1);
-				return 0;
+				hflag = 1;
+				break;
 			case 'v':
-				version();
-				return 0;
+				vflag = 1;
+				break;
 			case 'c':
 				cflag = 1;
 				break;
@@ -449,9 +446,35 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	subvolume = argv[optind];  // Only one non-option argument. It must be the subvolume, otherwise, (null).
 
-	strcpy(subv_path, argv[optind]);
+	if(hflag)
+	{
+		help(0);
+		return 0;
+	}
+	else if (vflag)
+	{
+		version();
+		return 0;
+	}
+
+	if (argv[optind])  // Determining the subvolume
+		subv_path = argv[optind];
+	else
+		if (getcwd(cwd, sizeof(cwd)) == NULL)  // cwd must be current directory
+		{
+			perror("Can not get the current working directory.\n");
+			return 1;
+		}
+		else
+			subv_path = cwd;
+
+	if (check_if_subvol(subv_path))  // Quit on wrong subvolume selection
+	{
+		fprintf(stderr, "Selected directory is not a subvolume: %s\n",
+				subv_path);
+		return 1;
+	}
 
 	strcpy(store_path, subv_path);
 	strcat(store_path, STORE);
@@ -470,8 +493,6 @@ int main(int argc, char **argv)
 			qvalue = defquota;
 	}
 
-	if (!subvolume)
-		subvolume = cwd;
 
 	get_snapshots();
 	sort_snapshots();
@@ -494,7 +515,10 @@ int main(int argc, char **argv)
 		if (is_integer(dvalue))
 			index = atoi(dvalue);
 		else
+		{
+			fprintf(stderr, "The selected snapshot does not exist.\n");
 			return 1;
+		}
 		if (delete_snapshot(index))
 			return 1;
 	}
