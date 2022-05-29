@@ -1,4 +1,6 @@
 makesnap
+# Swap files
+*.kate-swp
 # Prerequisites
 *.d
 
