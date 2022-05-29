@@ -30,9 +30,9 @@ install: src/$(EXECUTABLE) LICENSE README.md arch_install_services
 	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(EXECUTABLE)/COPYING
 	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(EXECUTABLE)/README
 
-arch_install_services: src/$(EXECUTABLE_NAME)@.service src/$(EXECUTABLE_NAME)@.timer
-	install -Dm644 src/$(EXECUTABLE_NAME)@.service $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE_NAME)@.service
-	install -Dm644 src/$(EXECUTABLE_NAME)@.timer $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE_NAME)@.timer
+arch_install_services: src/$(EXECUTABLE)@.service src/$(EXECUTABLE)@.timer
+	install -Dm644 src/$(EXECUTABLE)@.service $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)@.service
+	install -Dm644 src/$(EXECUTABLE)@.timer $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)@.timer
 
 uninstall:
 	rm -f $(PREFIX)/bin/$(EXECUTABLE)
