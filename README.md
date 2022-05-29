@@ -15,7 +15,7 @@ command line. It is designed for working with other tools like `crond` or
 - Usage:
 
 ~~~
-	makesnap [-cflhv] [-q quota] [-r restore] [-d delete]  [subvolume]
+	makesnap [-clhv] [-q quota] [-r restore] [-d delete]  [subvolume]
 ~~~
 
 
@@ -38,10 +38,6 @@ if it not exists.
 
 	Clean all snapshots in the [_subvolume/_]`.snapshots` directory. Then also
 	deletes such directory.
-	
-	`-f`
-	
-	Forces creation of the snapshot. Regardless of the value of the option `-a`.
 	
 	`-l`
 	

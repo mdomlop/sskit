@@ -68,10 +68,9 @@ void help (int error)
 	"Options:\n\n"
 	"\tsubvolume    Path to subvolume."
 	" Defaults to current directory.\n"
-	"\t-c           Cleans (deletes) all snapshots in subvolume.\n"
-	"\t-f           Forces creation of the snapshot.\n"
 	"\t-l           Show a numbered list of snapshots in subvolume.\n"
-	"\t-h           Show this help.\n"
+	"\t-c           Cleans (deletes) all snapshots in subvolume.\n"
+	"\t-h           Show this help and exit.\n"
 	"\t-v           Show program version and exit.\n"
 	"\t-q quota     Maximum quota of snapshots for subvolume. Defaults to `30'.\n"
 	"\t-r restore   Restores the selected snapshot.\n"
@@ -100,16 +99,6 @@ int check_path_size(char *path)
 	}
 	return 0;
 }
-
-int join_paths(char *dest, char *path1, char *path2)
-{
-	strcpy(dest, path1);
-	strcpy(dest, path2);
-	if (check_path_size(dest))
-		return 1;
-	return 0;
-}
-
 
 void sort_snapshots(void)
 {
@@ -149,6 +138,10 @@ int delete_snapshot (int index)
 
 	if(rmdir(mysnap))
 	{
+		fprintf(stderr,
+				"An error occurred while trying to delete the snapshot: "
+				"%s\n", mysnap);
+		perror("");
 		return 1;
 	}
 	else
@@ -220,7 +213,8 @@ int restore_snapshot (char * index)
 		i = atoi(index);
 	else
 	{
-		fprintf(stderr, "The selected snapshot does not exist.\n");
+		fprintf(stderr, "The selected snapshot number is not valid: %s\n",
+			   index);
 		return 1;
 	}
 
@@ -324,7 +318,7 @@ int make_snapshot(void)
 	return 0;
 }
 
-int create_snapshot(int force, char * quota)
+int create_snapshot(char * quota)
 {
 	int quota_int;
 
@@ -343,17 +337,9 @@ int create_snapshot(int force, char * quota)
 	if(create_store())
 		return 1;
 
-	if(force)
-	{
-		printf("Se fuerza la creación del snapshot en: ");
-		make_snapshot();
-	}
-	else
-	{
-		check_quota(quota_int);
-		printf("Se crea del snapshot sin forzar en: ");
-		make_snapshot();
-	}
+	check_quota(quota_int);
+	printf("Se crea del snapshot sin forzar en: ");
+	make_snapshot();
 
 	return 0;
 }
@@ -365,7 +351,6 @@ int main(int argc, char **argv)
 	int hflag = 0;
 	int vflag = 0;
 	int cflag = 0;
-	int fflag = 0;
 	int lflag = 0;
 
 	char *qvalue = NULL;
@@ -394,7 +379,7 @@ int main(int argc, char **argv)
 
 	int c;
 
-	while ((c = getopt (argc, argv, "cflhvq:r:d:")) != -1)
+	while ((c = getopt (argc, argv, "clhvq:r:d:")) != -1)
 		switch (c)
 		{
 			case 'h':
@@ -405,9 +390,6 @@ int main(int argc, char **argv)
 				break;
 			case 'c':
 				cflag = 1;
-				break;
-			case 'f':
-				fflag = 1;
 				break;
 			case 'l':
 				lflag = 1;
@@ -497,7 +479,7 @@ int main(int argc, char **argv)
 	get_snapshots();
 	sort_snapshots();
 
-	//printf("cflag = %d, fflag = %d, lflag = %d, qvalue = %s, rvalue = %s, dvalue = %s, subv_path = %s\n", cflag, fflag, lflag, qvalue, rvalue, dvalue, subv_path);
+	//printf("cflag = %d, lflag = %d, qvalue = %s, rvalue = %s, dvalue = %s, subv_path = %s\n", cflag, lflag, qvalue, rvalue, dvalue, subv_path);
 
 
 	if (rvalue && dvalue)
@@ -534,7 +516,7 @@ int main(int argc, char **argv)
 			return 1;
 	}
 	else
-		create_snapshot(fflag, qvalue);
+		create_snapshot(qvalue);
 
 
 	/*
