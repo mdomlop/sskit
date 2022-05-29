@@ -4,11 +4,11 @@ MakeSnap
 KISS tool for make snapshots in a Btrfs filesystem.
 
 
-Snapshots will be stored in [_subvolume/_]`.snapshots` directory. Here snapshots
-are named with this timestamp format: **YYYY-MM-DD_hh.mm.ss**
+Snapshots will be stored in [_subvolume/_]`.snapshots` directory. Here,
+snapshots are named with this timestamp format: **YYYY-MM-DD_hh.mm.ss**
 
 
-For simplicity, Makesnap has no configuration file, only a non interactive 
+For simplicity, Makesnap has no configuration file, only a not interactive 
 command line. It is designed for working with other tools like `crond` or
 `systemd-timer`.
 
@@ -19,19 +19,27 @@ command line. It is designed for working with other tools like `crond` or
 ~~~
 
 
-With no options, the program will trie to use the current working directory 
-as a subvolume. If it is not a btrfs subvolume, program will exit. Otherwise,
-will make a new snapshot under `./subvolume/`, and if quota were overpassed, 
-will delete the older subvolume. `./subvolume` directory will be created
-if it not exists.
+With no options, the program will try to use the environment variables
+`MAKESNAPSUBVOLUME` and `MAKESNAPQUOTA`, and if someone are empty, defaults to
+harcoded values, which are `"/"`, and `30`, for _subvolume_ and _quota_
+respectively.
 
+In every execution a new snapshot of the _subvolume_ will be created until
+reach the _quota_, and then, when quota were overpassed, will delete the oldest
+snapshot in `subvolume/.snapshots/` until fit to the quota.
+
+`.snapshots` directory will be created if it not exists and will be removed if
+all the snapshots are deleted.
 
 - Options:
 
 	`subvolume`
 
-	Path to subvolume. If not supplied, current directory will be used.
-	If current directory is not a btrfs subvolume, an error message will be
+	Path to subvolume that will be snapshotted.  If not supplied, the program
+	will try to use the environment variable `MAKESNAPSUBVOLUME`, and if empty,
+	defaults to harcoded value, which is `"/"`,
+
+	If such path is not a btrfs subvolume, an error message will be
 	displayed, and no snapshot will be created.
 
 	`-c`
