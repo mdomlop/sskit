@@ -1,4 +1,5 @@
 makesnap
+PKGBUILD
 # Swap files
 *.kate-swp
 # Prerequisites
