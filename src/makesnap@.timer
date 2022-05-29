@@ -1,0 +1,9 @@
+[Unit]
+Description=Running MakeSnap every 30m.
+
+[Timer]
+OnBootSec=1
+OnUnitActiveSec=30min
+
+[Install]
+WantedBy=timers.target

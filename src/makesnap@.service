@@ -1,0 +1,10 @@
+[Unit]
+Description=MakeSnap BtrFS snapshot manager.
+
+[Service]
+Type=oneshot
+Environment="MAKESNAPSUBVOLUME=%I"
+ExecStart=/usr/bin/makesnap
+
+[Install]
+WantedBy=multi-user.target

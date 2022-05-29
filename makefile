@@ -25,10 +25,14 @@ elf: src/$(EXECUTABLE)
 debug: CFLAGS = -Wall -ggdb3
 debug: src/$(EXECUTABLE)
 
-install: src/$(EXECUTABLE) LICENSE README.md
+install: src/$(EXECUTABLE) LICENSE README.md arch_install_services
 	install -Dm 755 src/$(EXECUTABLE) $(DESTDIR)$(PREFIX)/bin/$(EXECUTABLE)
 	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(EXECUTABLE)/COPYING
 	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(EXECUTABLE)/README
+
+arch_install_services: src/$(EXECUTABLE_NAME)@.service src/$(EXECUTABLE_NAME)@.timer
+	install -Dm644 src/$(EXECUTABLE_NAME)@.service $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE_NAME)@.service
+	install -Dm644 src/$(EXECUTABLE_NAME)@.timer $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE_NAME)@.timer
 
 uninstall:
 	rm -f $(PREFIX)/bin/$(EXECUTABLE)
