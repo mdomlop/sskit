@@ -2,12 +2,14 @@
 #include <stdlib.h> /* gentenv(), abort() */
 #include <string.h> /* strlen() */
 #include <ctype.h>  /* isdigit() */
-#include <unistd.h>
+#include <unistd.h> /* uid, euid */
 #include <getopt.h>
 #include <linux/limits.h>
 
-#include <sys/types.h>  /* for list directory */
+#include <linux/types.h>  /* for list directory */
 #include <sys/stat.h>  /* for check directory */
+#include <sys/statfs.h>  /* for check btrfs? */
+//#include <linux/magic.h> /* for check btrfs */ 
 #include <dirent.h>
 
 #include <time.h>
@@ -40,6 +42,18 @@ char snap_path[PATH_MAX];  // Path to subvolume/.snapshots/timestamp
 char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in store_path
 int snapls_c = 0;  // Number of elements in snaplist
 
+int check_root(void)
+{
+	int uid = getuid();
+	int euid = geteuid();
+	if (uid != 0 || uid != euid)
+	{
+		fprintf(stderr, "You must to be root for do this.\n");
+		return 1;
+	}
+	return 0;
+}
+
 int is_integer (char * s)
 /* Determines if passed string is a positive integer */
 {
@@ -63,7 +77,7 @@ void version (void)
 void help (int error)
 {
 	char text[] = "\nUsage:\n"
-	"\tmakesnap [-cflhv] [-q quota] [-r restore] [-d delete]  "
+	"\tmakesnap [-cflhv] [-q quota] [-d delete]  "
 	"[subvolume]\n\n"
 	"Options:\n\n"
 	"\tsubvolume    Path to subvolume."
@@ -73,7 +87,6 @@ void help (int error)
 	"\t-h           Show this help and exit.\n"
 	"\t-v           Show program version and exit.\n"
 	"\t-q quota     Maximum quota of snapshots for subvolume. Defaults to `30'.\n"
-	"\t-r restore   Restores the selected snapshot.\n"
 	"\t-d delete    Deletes the selected snapshot.\n";
 
 	if (error)
@@ -97,6 +110,15 @@ int check_path_size(char *path)
 			return 1;
 		}
 	}
+	return 0;
+}
+
+int is_dir(char *dir)
+{ /* Check if directory alredy exists. */
+	struct stat sb;
+
+	if (stat(dir, &sb) == 0 && S_ISDIR(sb.st_mode))
+		return 1;  // Directory alredy exists
 	return 0;
 }
 
@@ -125,7 +147,11 @@ void list_snapshots(void)
 
 int delete_snapshot (int index)
 {
+	if (check_root()) return 1;
+
 	char mysnap[PATH_MAX];
+	char command[PATH_MAX];
+	int ret = 0;
 
 	if (index >= snapls_c)
 	{
@@ -136,16 +162,21 @@ int delete_snapshot (int index)
 	strcpy(mysnap, store_path);
 	strcat(mysnap, snaplist[index]);
 
-	if(rmdir(mysnap))
+	strcpy(command, "btrfs subvolume delete '");
+	strcat(command, mysnap);
+	strcat(command, "' > /dev/null");
+	//printf("Command: %s\n", command);
+	
+	ret = system(command);
+	if(ret)
 	{
 		fprintf(stderr,
 				"An error occurred while trying to delete the snapshot: "
-				"%s\n", mysnap);
+				"'%s'\n", mysnap);
 		perror("");
 		return 1;
 	}
-	else
-		printf("Se borra la copia %d: %s\n", index, mysnap);
+		printf("Snapshot deleted [%d]: %s\n", index, mysnap);
 
 	return 0;
 }
@@ -166,7 +197,7 @@ int clean_all_snapshots(void)
 	}
 	else
 	{
-		printf("Se borra el almacén vacío: %s\n", store_path);
+		printf("Empty store deleted: %s\n", store_path);
 	}
 	return 0;
 }
@@ -204,40 +235,12 @@ int get_snapshots(void)
 	return 0;
 }
 
-int restore_snapshot (char * index)
-{
-	char mysnap[PATH_MAX];
-	int i;
-
-	if (is_integer(index))
-		i = atoi(index);
-	else
-	{
-		fprintf(stderr, "The selected snapshot number is not valid: %s\n",
-			   index);
-		return 1;
-	}
-
-	if (i >= snapls_c)
-	{
-		fprintf(stderr, "The selected snapshot does not exist.\n");
-		return 1;
-	}
-
-	strcpy(mysnap, store_path);
-	strcat(mysnap, snaplist[i]);
-
-	printf("Se restaurará la copia: %s desde %s en %s\n", index, mysnap, subv_path);
-	return 0;
-}
 
 int create_store(void)
 {
-	struct stat sb;
-
-	if (stat(store_path, &sb) == 0 && S_ISDIR(sb.st_mode))
+	if (is_dir(store_path))
 	{
-		puts("Store alredy exists. No problemo.");
+		//puts("Store alredy exists. No problemo.");
 		return 0;  // Directory alredy exists
 	}
 	else
@@ -251,7 +254,7 @@ int create_store(void)
 			return 1;
 		}
 		else
-			printf("Se crea el almacén: %s\n", store_path);
+			printf("New store created: %s\n", store_path);
 	}
 	return 0;
 }
@@ -286,7 +289,7 @@ int check_quota(int quota)
 	int diff = quota - snapls_c;
 	int n = 0;
 
-	printf("Chequeo quota... (%d / %d) [%d]\n", snapls_c, quota, diff);
+	printf("Quota checking... (%d / %d) [%d]\n", snapls_c, quota, diff);
 	//list_snapshots();
 	//puts("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	//printf("Chequeo quota... (%d / %d) [%d]\n", snapls_c, quota, diff);
@@ -305,21 +308,40 @@ int check_quota(int quota)
 
 int make_snapshot(void)
 {
+	char command[PATH_MAX];
 	int ret = 0;
-	ret = mkdir (snap_path, 0755);
+
+	strcpy(command, "btrfs subvolume snapshot '");
+	strcat(command, subv_path);
+	strcat(command, "' '");
+	strcat(command, snap_path);
+	strcat(command, "' > /dev/null");
+	//printf("Command: %s\n", command);
+	
+
+	if (is_dir(snap_path))
+	{
+		fprintf(stderr, "Sorry. Too fast '%s'\n", snap_path);
+		return 0;  // Directory alredy exists
+	}
+
+	//ret = mkdir (snap_path, 0755);
+	ret = system(command);
 
 	if (ret)
 	{
-		fprintf(stderr, "Unable to create snapshot %s\n", snap_path);
+		fprintf(stderr, "Unable to create snapshot '%s'\n", snap_path);
 		return 1;
 	}
-	else
-		printf("%s\n", snap_path);
+
+	printf("Create snapshot of '%s' in '%s'\n", subv_path, snap_path);
 	return 0;
 }
 
 int create_snapshot(char * quota)
 {
+	if (check_root()) return 1;
+
 	int quota_int;
 
 	//printf("%s\n", subv_path);
@@ -330,7 +352,7 @@ int create_snapshot(char * quota)
 		quota_int = atoi(quota);
 	else
 	{
-		fprintf(stderr, "Invalid quota.\n");
+		fprintf(stderr, "Invalid quota setted.\n");
 		return 1;
 	}
 
@@ -338,7 +360,6 @@ int create_snapshot(char * quota)
 		return 1;
 
 	check_quota(quota_int);
-	printf("Se crea del snapshot sin forzar en: ");
 	make_snapshot();
 
 	return 0;
@@ -354,9 +375,7 @@ int main(int argc, char **argv)
 	int lflag = 0;
 
 	char *qvalue = NULL;
-	char *rvalue = NULL;
 	char *dvalue = NULL;
-	//char *subvolume = NULL;
 
 	char *env_quota = getenv("MAKESNAPQUOTA");
 
@@ -364,22 +383,16 @@ int main(int argc, char **argv)
 
 	time_t now;
 	struct tm ts;
-	//char buf[80];
 
-	// Get current time
-	time(&now);
+	time(&now); // Get current time
 
-	// Format time
-	ts = *localtime(&now);
+	ts = *localtime(&now); // Format time
 	strftime(timestamp, sizeof(timestamp), TIMESTAMP, &ts);
-	//printf("%s\n", timestamp);
-
 
 	int index = 0;
-
 	int c;
 
-	while ((c = getopt (argc, argv, "clhvq:r:d:")) != -1)
+	while ((c = getopt (argc, argv, "clhvq:d:")) != -1)
 		switch (c)
 		{
 			case 'h':
@@ -397,18 +410,11 @@ int main(int argc, char **argv)
 			case 'q':
 				qvalue = optarg;
 				break;
-			case 'r':
-				rvalue = optarg;
-				break;
 			case 'd':
 				dvalue = optarg;
 				break;
 			case '?':
-				if (optopt == 'a')
-					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
-				else if (optopt == 'q')
-					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
-				else if (optopt == 'r')
+				if (optopt == 'q')
 					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
 				else if (optopt == 'd')
 					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
@@ -453,7 +459,7 @@ int main(int argc, char **argv)
 
 	if (check_if_subvol(subv_path))  // Quit on wrong subvolume selection
 	{
-		fprintf(stderr, "Selected directory is not a subvolume: %s\n",
+		fprintf(stderr, "Selection is not a Btrfs subvolume: %s\n",
 				subv_path);
 		return 1;
 	}
@@ -479,20 +485,10 @@ int main(int argc, char **argv)
 	get_snapshots();
 	sort_snapshots();
 
-	//printf("cflag = %d, lflag = %d, qvalue = %s, rvalue = %s, dvalue = %s, subv_path = %s\n", cflag, lflag, qvalue, rvalue, dvalue, subv_path);
+	//printf("cflag = %d, lflag = %d, qvalue = %s, dvalue = %s, subv_path = %s\n", cflag, lflag, qvalue, dvalue, subv_path);
 
 
-	if (rvalue && dvalue)
-	{
-		fprintf (stderr, "Sorry. Restore and delete simultaniously is not accepted.\n");
-		return 2;
-	}
-	else if (rvalue)
-	{
-		if (restore_snapshot(rvalue))
-			return 1;
-	}
-	else if (dvalue)
+	if (dvalue)
 	{
 		if (is_integer(dvalue))
 			index = atoi(dvalue);
@@ -503,10 +499,9 @@ int main(int argc, char **argv)
 		}
 		if (delete_snapshot(index))
 			return 1;
+	return 0;
 	}
 
-	if (rvalue || dvalue)  // No execute other options
-		return 0;
 
 	if (lflag)
 		list_snapshots();
