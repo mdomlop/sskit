@@ -29,6 +29,7 @@
 #define STORE "/.snapshots/"
 #define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
 
+#define DEFSUBVOL "/"  // root directory
 #define DEFQUOTA "30"  // 30 snapshots
 
 int getopt(int argc, char *const argv[], const char *optstring);
@@ -367,7 +368,8 @@ int create_snapshot(char * quota)
 
 int main(int argc, char **argv)
 {
-	char *defquota = DEFQUOTA;
+	char *def_quota = DEFQUOTA;
+	char *def_subvol = DEFSUBVOL;
 
 	int hflag = 0;
 	int vflag = 0;
@@ -377,9 +379,8 @@ int main(int argc, char **argv)
 	char *qvalue = NULL;
 	char *dvalue = NULL;
 
+	char *env_subvol = getenv("MAKESNAPSUBVOLUME");
 	char *env_quota = getenv("MAKESNAPQUOTA");
-
-	char cwd[PATH_MAX];
 
 	time_t now;
 	struct tm ts;
@@ -447,15 +448,11 @@ int main(int argc, char **argv)
 	}
 
 	if (argv[optind])  // Determining the subvolume
-		subv_path = argv[optind];
+		subv_path = argv[optind];  // Command line or
+	else if (env_subvol)
+		subv_path = env_subvol;  // Environment or
 	else
-		if (getcwd(cwd, sizeof(cwd)) == NULL)  // cwd must be current directory
-		{
-			perror("Can not get the current working directory.\n");
-			return 1;
-		}
-		else
-			subv_path = cwd;
+		subv_path = def_subvol;  // Hardcoded
 
 	if (check_if_subvol(subv_path))  // Quit on wrong subvolume selection
 	{
@@ -478,7 +475,7 @@ int main(int argc, char **argv)
 		if (env_quota)
 			qvalue = env_quota;
 		else
-			qvalue = defquota;
+			qvalue = def_quota;
 	}
 
 
