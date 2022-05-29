@@ -7,7 +7,10 @@
 #include <linux/limits.h>
 
 #include <sys/types.h>  /* for list directory */
+#include <sys/stat.h>  /* for check directory */
 #include <dirent.h>
+
+#include <time.h>
 
 #define PROGRAM     "MakeSnap"
 #define EXECUTABLE  "makesnap"
@@ -19,6 +22,8 @@
 #define NICK        "mdomlop"
 #define MAIL        "zqbzybc@tznvy.pbz"
 
+//#define TIMESTAMP "%Y-%m-%d_%H.%M.%S"
+#define TIMESTAMP "%Y%m%d-%H%M%S"
 #define STORE "/.snapshots/"
 #define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
 
@@ -28,8 +33,13 @@
 int getopt(int argc, char *const argv[], const char *optstring);
 extern int optind, optopt;
 
-char snapshots[SNAPLISTSIZE][PATH_MAX];
-int snapshotsc = 0;
+char timestamp[80];
+char subv_path[PATH_MAX] = "";  // Path to subvolume
+char store_path[PATH_MAX] = "";  // Path to subvolume/.snapshots
+char snap_path[PATH_MAX] = "";  // Path to subvolume/.snapshots/timestamp
+
+char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in store_path
+int snapls_c = 0;  // Number of elements in snaplist
 
 int is_integer (char * s)
 /* Determines if passed string is a positive integer */
@@ -136,16 +146,17 @@ void help (int error)
 }
 
 
-int check_path_size(char *subv)
+int check_path_size(char *path)
 {
-	if (subv)
+	if (path)
 	{
-		int sub_path_size = strlen(subv);
+		int sub_path_size = strlen(path);
 
+		//if(sub_path_size > 10)  // Testing
 		if(sub_path_size > PATH_MAX)
 		{
 			fprintf (stderr, "Sorry. Path length is longer (%d) than PATH_MAX (%d):\n"
-					"%s\n", sub_path_size, PATH_MAX, subv);
+					"%s\n", sub_path_size, PATH_MAX, path);
 			return 1;
 		}
 	}
@@ -165,15 +176,15 @@ int join_paths(char *dest, char *path1, char *path2)
 void sort_snapshots(void)
 {
 	char temp[4096];
-	for (int i = 0; i < snapshotsc; i++)
+	for (int i = 0; i < snapls_c; i++)
 	{
-		for (int j = 0; j < snapshotsc -1 -i; j++)
+		for (int j = 0; j < snapls_c -1 -i; j++)
 		{
-			if (strcmp(snapshots[j], snapshots[j+1]) > 0)
+			if (strcmp(snaplist[j], snaplist[j+1]) > 0)
 			{
-				strcpy(temp, snapshots[j]);
-				strcpy(snapshots[j], snapshots[j+1]);
-				strcpy(snapshots[j+1], temp);
+				strcpy(temp, snaplist[j]);
+				strcpy(snaplist[j], snaplist[j+1]);
+				strcpy(snaplist[j+1], temp);
 			}
 		}
 	}
@@ -181,25 +192,25 @@ void sort_snapshots(void)
 
 void list_snapshots(void)
 {
-	for (int i = 0; i < snapshotsc; i++)
-		printf("[%d]\t%s\n", i, snapshots[i]);
+	for (int i = 0; i < snapls_c; i++)
+		printf("[%d]\t%s\n", i, snaplist[i]);
 }
 
 
-int get_snapshots(char *where)
+int get_snapshots(void)
 {
   DIR *dp;
   struct dirent *ep;
   int n = 0;
 
-  dp = opendir (where);
+  dp = opendir (store_path);
   if (dp != NULL)
     {
       while ((ep = readdir (dp)))
 	  {
         if (ep->d_name[0] != '.')
 		{
-			strcpy(snapshots[n], ep->d_name);
+			strcpy(snaplist[n], ep->d_name);
 			//printf("[%d] %s\n", n, ep->d_name);
 			n++;
 		}
@@ -207,66 +218,206 @@ int get_snapshots(char *where)
       (void) closedir (dp);
     }
   else
-    perror ("Couldn't open the directory");
+  {
+	  fprintf(stderr, "Couldn't open the directory: %s\n", store_path);
+    perror ("");
+  }
 
-	snapshotsc = n;
+	snapls_c = n;
   return 0;
 }
 
-int restore (char *subvol, char * index)
+int restore_snapshot (char * index)
 {
-	char snapshot[PATH_MAX];
+	char mysnap[PATH_MAX] = "";
 	int i;
 
-	strcat(snapshot, subvol);
-	strcat(snapshot, STORE);
 	if (is_integer(index))
 		i = atoi(index);
 	else
 		return 1;
 
-	if (i >= snapshotsc)
+	if (i >= snapls_c)
 	{
 		fprintf(stderr, "The selected snapshot does not exist.\n");
 		return 1;
 	}
-	printf("Se restaurará la copia: %s de %s:\n%s\n", index, subvol, snapshots[i]);
-	if (check_path_size(snapshot))
+
+	strcpy(mysnap, store_path);
+	strcat(mysnap, snaplist[i]);
+
+	printf("Se restaurará la copia: %s desde %s en %s\n", index, mysnap, subv_path);
+	return 0;
+}
+
+int delete_snapshot (char * index)
+{
+	char mysnap[PATH_MAX] = "";
+	int i;
+
+	if (is_integer(index))
+		i = atoi(index);
+	else
 		return 1;
+
+	if (i >= snapls_c)
+	{
+		fprintf(stderr, "The selected snapshot does not exist.\n");
+		return 1;
+	}
+
+	strcpy(mysnap, store_path);
+	strcat(mysnap, snaplist[i]);
+
+	printf("Se borrará la copia %s: %s\n", index, mysnap);
 	return 0;
 }
 
-int delete (char *subvol, char * index)
+int create_store(void)
 {
-	printf("Se borrará la copia: %s de %s\n", index, subvol);
-	return 0;
-}
+	struct stat sb;
 
-int create_snapshot(char *where)
-{
-	return 0;
-}
-
-int create_store(char *subvol)
-{
+	if (stat(store_path, &sb) == 0 && S_ISDIR(sb.st_mode))
+	{
+		puts("Directory exists. No problemo.");
+		return 0;  // Directory alredy exists
+	}
+	else
+	{
+		int ret = 0;
+		ret = mkdir (store_path, 0755);
+		if (ret)
+		{
+			fprintf(stderr, "Unable to create directory %s\n", store_path);
+			return 1;
+		}
+		else
+			puts(".snapshots creado con éxito.");
+	}
 	return 0;
 }
 
 int check_if_subvol(char *where)
 {
-	return 0;
+	struct stat sb;
+	size_t inode;
+
+	if (stat(where, &sb) == -1)
+	{
+		perror("stat");
+		exit(EXIT_FAILURE);
+	}
+
+	//printf("I-node number %s: %ld\n", where, (long) sb.st_ino);
+
+	inode = (long) sb.st_ino;
+	
+	switch (inode)
+	{
+		case 2:
+		case 256:
+			return 0;
+		default:
+			return 1;
+	}
 }
 
-int check_age(char *subvol)
+int check_age(int age)
 {
 	return 0;
 }
 
-int check_quota(char *subvol)
+int check_quota(int quota)
 {
+	int diff = quota - snapls_c;
+	int n = 0;
+	char mysnap[PATH_MAX] = "";
+
+	printf("Chequeo quota... (%d / %d) [%d]\n", snapls_c, quota, diff);
+	list_snapshots();
+	puts("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	printf("Chequeo quota... (%d / %d) [%d]\n", snapls_c, quota, diff);
+	for (int i = diff; i < 0; i++)
+	{
+		strcpy(mysnap, store_path);
+		strcat(mysnap, snaplist[n]);
+
+		printf("rmdir %s\n", mysnap);
+		if (rmdir(mysnap))
+			puts("Borrado");
+		n++;
+	}
+		
+	get_snapshots();
+	list_snapshots();
+
 	return 0;
 }
 
+int make_snapshot(int write)
+{
+	int ret = 0;
+
+	if (write)
+	{
+		ret = mkdir (snap_path, 0755);
+		if (ret)
+		{
+			fprintf(stderr, "Unable to create snapshot %s\n", snap_path);
+			return 1;
+		}
+		else
+			printf("(R/W) en: %s\n", snap_path);
+	}
+	else
+	{
+		ret = mkdir (snap_path, 0755);
+		if (ret)
+		{
+			fprintf(stderr, "Unable to create snapshot %s\n", snap_path);
+			return 1;
+		}
+		else
+			printf("(R/O) en: %s\n", snap_path);
+	}
+	return 0;
+}
+
+int create_snapshot(int force, int write, char * quota)
+{
+	int quota_int;
+
+	printf("%s\n", subv_path);
+	printf("%s\n", store_path);
+	printf("%s\n", snap_path);
+	if (check_if_subvol(subv_path))
+	{
+		puts("No es un subvolume");
+		return 1;
+	}
+
+	if (is_integer(quota))
+		quota_int = atoi(quota);
+	else
+		return 1;
+
+	if(create_store())
+		return 1;
+
+	if(force)
+	{
+		puts("Se fuerza la creación del snapshot");
+		make_snapshot(write);
+	}
+	else
+	{
+		check_quota(quota_int);
+		puts("Se crea del snapshot sin forzar");
+		make_snapshot(write);
+	}
+
+	return 0;
+}
 
 int main(int argc, char **argv)
 {
@@ -292,6 +443,20 @@ int main(int argc, char **argv)
 		perror("Can not get the current working directory.\n");
 		return 1;
 	}
+
+
+	time_t now;
+	struct tm ts;
+	//char buf[80];
+
+	// Get current time
+	time(&now);
+
+	// Format time
+	ts = *localtime(&now);
+	strftime(timestamp, sizeof(timestamp), TIMESTAMP, &ts);
+	//printf("%s\n", timestamp);
+
 
 	int c;
 
@@ -352,7 +517,13 @@ int main(int argc, char **argv)
 
 	subvolume = argv[optind];  // Only one non-option argument. It must be the subvolume, otherwise, (null).
 
-	if (check_path_size(subvolume))
+	strcat(subv_path, argv[optind]);
+	strcat(store_path, subv_path);
+	strcat(store_path, STORE);
+	strcat(snap_path, store_path);
+	strcat(snap_path, timestamp);
+
+	if (check_path_size(snap_path))
 		return 1;
 
 	if (!avalue)
@@ -374,10 +545,10 @@ int main(int argc, char **argv)
 	if (!subvolume)
 		subvolume = cwd;
 
-	get_snapshots(subvolume);
+	get_snapshots();
 	sort_snapshots();
 
-	printf("fflag = %d, lflag = %d, wflag = %d, avalue = %s, qvalue = %s, rvalue = %s, dvalue = %s, subvolume = %s\n", fflag, lflag, wflag, avalue, qvalue, rvalue, dvalue, subvolume);
+	//printf("fflag = %d, lflag = %d, wflag = %d, avalue = %s, qvalue = %s, rvalue = %s, dvalue = %s, subv_path = %s\n", fflag, lflag, wflag, avalue, qvalue, rvalue, dvalue, subv_path);
 
 
 	if (rvalue && dvalue)
@@ -387,12 +558,12 @@ int main(int argc, char **argv)
 	}
 	else if (rvalue)
 	{
-		if (restore(subvolume, rvalue))
+		if (restore_snapshot(rvalue))
 			return 1;
 	}
 	else if (dvalue)
 	{
-		if (delete(subvolume, dvalue))
+		if (delete_snapshot(dvalue))
 			return 1;
 	}
 
@@ -401,6 +572,8 @@ int main(int argc, char **argv)
 
 	if (lflag)
 		list_snapshots();
+	else
+		create_snapshot(fflag, wflag, qvalue);
 
 
 	/*
@@ -408,4 +581,6 @@ int main(int argc, char **argv)
 		printf("Non-option argument: %s\n", argv[index]);
 	return 0;
 	*/
+
+	return 0;
 }
