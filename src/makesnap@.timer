@@ -1,5 +1,5 @@
 [Unit]
-Description=Running MakeSnap every 30m.
+Description=Running MakeSnap on %I every 30min.
 
 [Timer]
 OnBootSec=1
