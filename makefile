@@ -1,4 +1,6 @@
 SOURCES = src/makesnap.c
+SERVICES = src/makesnap@.service src/makesnap@.timer
+
 NAME = $(shell grep -m1 PROGRAM $(SOURCES) | cut -d\" -f2)
 EXECUTABLE = $(shell grep -m1 EXECUTABLE $(SOURCES) | cut -d\" -f2)
 DESCRIPTION = $(shell grep -m1 DESCRIPTION $(SOURCES) | cut -d\" -f2)
@@ -15,6 +17,7 @@ DESTDIR = ''
 CFLAGS = -Os -Wall -std=c11 -pedantic -static
 
 INSTALLED_BINARIES = $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(EXECUTABLE))
+INSTALLED_SERVICES = $(addprefix $(DESTDIR)$(PREFIX)/lib/systemd/system/,$(notdir $(SERVICES)))
 
 PKGEXT=.pkg.tar.zst
 ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
@@ -22,6 +25,10 @@ ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
 ELFS = $(addsuffix .elf,$(addprefix src/,$(EXECUTABLE)))
 
 all: elf
+
+install: install_elf LICENSE README.md arch_install_services
+	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(EXECUTABLE)/COPYING
+	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(EXECUTABLE)/README
 
 %.elf: %.c
 	$(CC) $^ -o $@ $(CFLAGS)
@@ -40,13 +47,13 @@ $(DESTDIR)$(PREFIX)/bin/%: src/%.elf
 	install -dm 755 $(DESTDIR)$(PREFIX)/bin/
 	install -Dm 755 $^ $@
 
-install: install_elf LICENSE README.md arch_install_services
-	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(EXECUTABLE)/COPYING
-	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(EXECUTABLE)/README
-
-arch_install_services: src/$(EXECUTABLE)@.service src/$(EXECUTABLE)@.timer
-	install -Dm 644 src/$(EXECUTABLE)@.service $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)@.service
-	install -Dm 644 src/$(EXECUTABLE)@.timer $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)@.timer
+arch_install_services: $(INSTALLED_SERVICES)
+$(DESTDIR)$(PREFIX)/lib/systemd/system/%.service: src/%.service
+	install -dm 755 $(DESTDIR)$(PREFIX)/lib/systemd/system/
+	install -Dm 644 $^ $@
+$(DESTDIR)$(PREFIX)/lib/systemd/system/%.timer: src/%.timer
+	install -dm 755 $(DESTDIR)$(PREFIX)/lib/systemd/system/
+	install -Dm 644 $^ $@
 
 uninstall:
 	rm -f $(INSTALLED_BINARIES)
