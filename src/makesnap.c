@@ -312,7 +312,7 @@ int make_snapshot(void)
 	char command[PATH_MAX];
 	int ret = 0;
 
-	strcpy(command, "btrfs subvolume snapshot '");
+	strcpy(command, "btrfs subvolume snapshot -r '");
 	strcat(command, subv_path);
 	strcat(command, "' '");
 	strcat(command, snap_path);
