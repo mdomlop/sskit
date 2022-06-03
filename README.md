@@ -15,7 +15,7 @@ command line. It is designed for working with other tools like `crond` or
 - Usage:
 
 ~~~
-	makesnap [-clhv] [-q quota] [-d delete]  [subvolume]
+	makesnap [-clhvS] [-p pool] [-q quota] [-d delete]  [subvolume]
 ~~~
 
 
@@ -74,3 +74,7 @@ all the snapshots are deleted.
 	`-d --delete` *n*
 
 	Deletes selected snapshot *n*. Check the `-l` option to obtain *n*.
+	
+	`-S` *time*
+	
+	Runs as a service (_daemon_) and make snapshots every *time*

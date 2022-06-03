@@ -1,5 +1,7 @@
 SOURCES = src/makesnap.c
-SERVICES = src/makesnap@.service src/makesnap@.timer
+SERVICES = src/makesnap10s@.timer src/makesnap12h@.timer src/makesnap30m@.timer src/makesnap8h@.timer src/makesnap@.service
+CONFS = src/root.example.conf
+CONFS = 
 
 NAME = $(shell grep -m1 PROGRAM $(SOURCES) | cut -d\" -f2)
 EXECUTABLE = $(shell grep -m1 EXECUTABLE $(SOURCES) | cut -d\" -f2)
@@ -18,6 +20,7 @@ CFLAGS = -Os -Wall -std=c11 -pedantic -static
 
 INSTALLED_BINARIES = $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(EXECUTABLE))
 INSTALLED_SERVICES = $(addprefix $(DESTDIR)$(PREFIX)/lib/systemd/system/,$(notdir $(SERVICES)))
+INSTALLED_CONFS = $(addprefix $(DESTDIR)/etc/makesnap/,$(notdir $(CONFS)))
 
 PKGEXT=.pkg.tar.zst
 ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
@@ -26,9 +29,11 @@ ELFS = $(addsuffix .elf,$(addprefix src/,$(EXECUTABLE)))
 
 all: elf
 
-install: install_elf LICENSE README.md arch_install_services
+install: install_elf LICENSE README.md
 	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(EXECUTABLE)/COPYING
 	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(EXECUTABLE)/README
+
+arch_install: install systemd_arch_install_services systemd_install_confs
 
 %.elf: %.c
 	$(CC) $^ -o $@ $(CFLAGS)
@@ -47,7 +52,7 @@ $(DESTDIR)$(PREFIX)/bin/%: src/%.elf
 	install -dm 755 $(DESTDIR)$(PREFIX)/bin/
 	install -Dm 755 $^ $@
 
-arch_install_services: $(INSTALLED_SERVICES)
+systemd_arch_install_services: $(INSTALLED_SERVICES)
 $(DESTDIR)$(PREFIX)/lib/systemd/system/%.service: src/%.service
 	install -dm 755 $(DESTDIR)$(PREFIX)/lib/systemd/system/
 	install -Dm 644 $^ $@
@@ -55,10 +60,19 @@ $(DESTDIR)$(PREFIX)/lib/systemd/system/%.timer: src/%.timer
 	install -dm 755 $(DESTDIR)$(PREFIX)/lib/systemd/system/
 	install -Dm 644 $^ $@
 
+systemd_install_confs: $(INSTALLED_CONFS)
+$(DESTDIR)/etc/makesnap/%.conf: src/%.conf
+	install -dm 755 $(DESTDIR)/etc/makesnap/
+	install -Dm 644 $^ $@
+
 uninstall:
 	rm -f $(INSTALLED_BINARIES)
 	rm -f $(PREFIX)/share/licenses/$(PKGNAME)/LICENSE
 	rm -f $(PREFIX)/share/doc/$(PKGNAME)/README
+
+arch_uninstall: uninstall arch_uninstall_services
+
+arch_uninstall_services:
 	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)@.service
 	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)@.timer
 
@@ -71,7 +85,7 @@ clean: arch_clean
 	rm -rf $(ELFS)
 
 arch_pkg: $(ARCHPKG)
-$(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES)
+$(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(SERVICES) $(CONFS)
 	makepkg -df PKGDEST=./ BUILDDIR=./ PKGEXT='$(PKGEXT)'
 	@echo
 	@echo Package done!
@@ -97,7 +111,7 @@ PKGBUILD:
 	echo '}' >> $@
 	echo 'package() {' >> $@
 	echo 'cd $$startdir' >> $@
-	echo 'make install DESTDIR=$$pkgdir' >> $@
+	echo 'make arch_install DESTDIR=$$pkgdir' >> $@
 	echo '}' >> $@
 
 .PHONY: clean arch_clean uninstall

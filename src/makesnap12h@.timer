@@ -1,0 +1,10 @@
+[Unit]
+Description=Running MakeSnap every 12 hours (/etc/makesnap/%I.conf).
+
+[Timer]
+OnBootSec=1
+OnUnitActiveSec=12h
+Unit=makesnap@.service
+
+[Install]
+WantedBy=timers.target

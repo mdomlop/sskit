@@ -1,9 +1,13 @@
 [Unit]
-Description=MakeSnap BtrFS snapshot manager.
+Description=MakeSnap BtrFS snapshot manager (/etc/makesnap/%I.conf).
 
 [Service]
 Type=oneshot
-Environment="MAKESNAPSUBVOLUME=%I"
+#Environment="MAKESNAPSUBVOLUME=%I"
+#Type=forking
+EnvironmentFile=/etc/makesnap/%I.conf
+PIDFile=makesnap-%I.pid  # For oneshot 
+#PIDFile=makesnap.pid  # For multithread version (Daemon mode)
 ExecStart=/usr/bin/makesnap
 
 [Install]
