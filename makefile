@@ -1,7 +1,7 @@
 SOURCES = src/makesnap.c
 SERVICES = src/makesnap10s@.timer src/makesnap12h@.timer src/makesnap30m@.timer src/makesnap8h@.timer src/makesnap@.service
 CONFS = src/root.example.conf
-CONFS = 
+CONFS =
 
 NAME = $(shell grep -m1 PROGRAM $(SOURCES) | cut -d\" -f2)
 EXECUTABLE = $(shell grep -m1 EXECUTABLE $(SOURCES) | cut -d\" -f2)
@@ -79,7 +79,7 @@ arch_uninstall_services:
 arch_clean:
 	rm -rf pkg
 	rm -f PKGBUILD
-	rm -f $(ARCHPKG)
+	rm -f $(PKGNAME)-*$(PKGEXT)
 
 clean: arch_clean
 	rm -rf $(ELFS)
