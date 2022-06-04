@@ -27,7 +27,7 @@
 
 //#define TIMESTAMP "%Y-%m-%d_%H.%M.%S"
 #define TIMESTAMP "%Y%m%d-%H%M%S"
-#define STORE "/.snapshots/"
+#define STORE "/.snapshots/"  // Fixed location
 #define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
 
 #define DEFSUBVOL "/"  // root directory
@@ -47,7 +47,7 @@ char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in pool_path
 int snapls_c = 0;  // Number of elements in snaplist
 
 char timestamp[80];
-char tshuman[80];
+char tshuman[80];  // Human readable timestamp, for list_snapshots()
 
 int check_root(void)
 {
@@ -549,6 +549,12 @@ int update_snap_path(void)
 
 	if (check_path_size(snap_path))
 		return 1;
+	return 0;
+}
+
+int has_changed(void)
+{
+	/* Checks if subv_path has change from older_snapshot */
 	return 0;
 }
 
