@@ -192,7 +192,7 @@ int main(int argc, char **argv)
 				//rmdir(snap_path);
 				strcpy(cmd, "btrfs subvolume delete '");
 				strcat(cmd, snap_path);
-				strcat(cmd, "'");
+				strcat(cmd, "' > /dev/null");
 				system(cmd);
 			}
 		}

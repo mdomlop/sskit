@@ -152,7 +152,7 @@ int has_changed(char *last, char *orig, char *pool)
 	strcat(cmd, "' ");
     strcat(cmd, "| grep Generation | cut -d: -f2| tr -d '[:space:]'");
 
-    printf("%s\n", cmd);
+    //printf("%s\n", cmd);
 
     if (check_cmdout(cmd, buffer))  // Generation number is in buffer.
     {
@@ -163,7 +163,7 @@ int has_changed(char *last, char *orig, char *pool)
         strcat(cmd, buffer);
         strcat(cmd, "");
 
-        printf("%s\n", cmd);
+        //printf("%s\n", cmd);
 
         if (!check_cmdout(cmd, buffer))  // If more than one line in cmd output
             return 1;  // Has changed
@@ -448,7 +448,7 @@ int make_snapshot(char *subv_path, char *snap_path)
 	strcat(cmd, subv_path);
 	strcat(cmd, "' '");
 	strcat(cmd, snap_path);
-	strcat(cmd, "'");
+	strcat(cmd, "' > /dev/null");
 
 	/*
 	strcpy(cmd, "mkdir '");
