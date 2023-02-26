@@ -12,10 +12,27 @@ For simplicity, Makesnap has no configuration file, only a not interactive
 command line. It is designed for working with other tools like `crond` or
 `systemd-timer`.
 
-- Usage:
+Usage:
+
+- Client/Server mode:
+~~~
+			makesnap -s [configrc]
+			makesnap -a -i subvolume -o directory -f freq -q quota
+			makesnap -p
+			makesnap -w
+			makesnap -d entryn
+~~~
+
+- Standalone mode:
 
 ~~~
-	makesnap [-clhvS] [-p pool] [-q quota] [-d delete]  [subvolume]
+			makesnap -l [subvolume] [pool]
+			makesnap -c subvolume [pool]
+			makesnap -r snapshotn
+			makesnap -f subvolume pool
+	
+			makesnap -h
+			makesanp -v
 ~~~
 
 
@@ -42,7 +59,7 @@ all the snapshots are deleted.
 	If such path is not a btrfs subvolume, an error message will be
 	displayed, and no snapshot will be created.
 
-	`-c`
+	`-R`
 
 	Clean all snapshots in the [_subvolume/_]`.snapshots` directory. Then also
 	deletes such directory.
@@ -71,7 +88,7 @@ all the snapshots are deleted.
 	If no quota is provided, defaults to environment variable MAKESNAPQUOTA,
 	and, if such variable is empty, defaults to harcoded value `30'.
 
-	`-d --delete` *n*
+	`-r` *n*
 
 	Deletes selected snapshot *n*. Check the `-l` option to obtain *n*.
 	

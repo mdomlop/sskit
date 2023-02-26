@@ -1,0 +1,37 @@
+makesnap  # No hace nada
+
+makesnap -l /Usuarios  # lista las pool y sus snapshots:
+
+/Usuarios@pacman 0:     Sat Jul  2 21:38:51 2022        /.snapshots/pacman/20220602-213851
+pacman 1:     Mon Jul 11 19:06:49 2022        /.snapshots/pacman/20220611-190649
+pacman 2:     Mon Jul 11 19:10:53 2022        /.snapshots/pacman/20220611-191053
+pacman 3:     Mon Jul 11 19:11:59 2022        /.snapshots/pacman/20220611-191159
+pacman 4:     Mon Jul 11 19:12:16 2022        /.snapshots/pacman/20220611-191216
+
+
+makesnap -r
+
+
+
+#  Comandos de servidor
+
+makesnap -S _time_
+
+	Ejecuta el modo servidor y carga /etc/makesnaprc si existe. _time_ min is 1m
+
+makesnap -a /Usuarios/fulano 30 25
+
+	Añade instancia al servidor
+
+makesnap -c
+
+	Imprime la configuración (numerada)
+
+makesnap -w
+
+	Guarda la configuración en /etc/makesnaprc (con cabeceras)
+
+makesnap -d _n_
+
+	Borra la entrada _n_ de la configuración (y detiene su hilo, update_config())
+

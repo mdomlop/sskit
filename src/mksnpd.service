@@ -1,0 +1,12 @@
+[Unit]
+Description=MakeSnap BtrFS snapshot daemon.
+
+[Service]
+UMask=0022
+Type=simple
+PIDFile=/tmp/mksnp.pid
+#PIDFile=makesnap.pid  # For multithread version (Daemon mode)
+ExecStart=/usr/bin/mksnpd
+
+[Install]
+WantedBy=multi-user.target
