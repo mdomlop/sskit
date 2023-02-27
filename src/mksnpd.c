@@ -7,15 +7,16 @@
 #include <signal.h>
 
 
-#define PROGRAM     "MakeSnapD"
-#define EXECUTABLE  "mksnpd"
-#define DESCRIPTION "Daemon for making snapshots in a Btrfs filesystem."
-#define VERSION     "0.1a"
-#define URL         "https://github.com/mdomlop/mksnp"
-#define LICENSE     "GPLv3+"
-#define AUTHOR      "Manuel Domínguez López"
-#define NICK        "mdomlop"
-#define MAIL        "zqbzybc@tznvy.pbz"
+#define PROGRAM      "MakeSnapD"
+#define EXECUTABLE   "mksnpd"
+#define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
+#define PKGNAME      "makesnap"
+#define VERSION      "0.1a"
+#define URL          "https://github.com/mdomlop/makesnap"
+#define LICENSE      "GPLv3+"
+#define AUTHOR       "Manuel Domínguez López"
+#define NICK         "mdomlop"
+#define MAIL         "zqbzybc@tznvy.pbz"
 
 #define CONFIGFILE "/etc/sstab"
 //#define CONFIGFILE "/home/mdl/Documentos/Programas/github/makesnap/src/sstab.test"

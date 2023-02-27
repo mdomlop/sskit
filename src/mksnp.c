@@ -13,18 +13,16 @@
 #include <dirent.h>
 #include <btrfsutil.h>
 
-
-
-#define PROGRAM	 "MakeSnap"
-#define EXECUTABLE  "mksnp"
-#define DESCRIPTION "Make snapshots in a Btrfs filesystem."
-#define VERSION	 "0.1a"
-#define URL		 "https://github.com/mdomlop/mksnp"
-#define LICENSE	 "GPLv3+"
-#define AUTHOR	  "Manuel Domínguez López"
-#define NICK		"mdomlop"
-#define MAIL		"zqbzybc@tznvy.pbz"
-
+#define PROGRAM	     "MakeSnap"
+#define EXECUTABLE   "mksnp"
+#define DESCRIPTION  "Make snapshots in a Btrfs filesystem."
+#define PKGNAME      "makesnap"
+#define VERSION      "0.1a"
+#define URL          "https://github.com/mdomlop/makesnap"
+#define LICENSE      "GPLv3+"
+#define AUTHOR       "Manuel Domínguez López"
+#define NICK         "mdomlop"
+#define MAIL         "zqbzybc@tznvy.pbz"
 
 #define PATH_MAX_STRING_SIZE 256
 

@@ -4,6 +4,7 @@ CONFS = src/sstab
 
 NAME = $(shell grep -m1 PROGRAM $(firstword $(SOURCES)) | cut -d\" -f2)
 EXECUTABLE = $(shell grep -m1 EXECUTABLE $(firstword $(SOURCES)) | cut -d\" -f2)
+PKGNAME = $(shell grep -m1 PKGNAME $(firstword $(SOURCES)) | cut -d\" -f2)
 DESCRIPTION = $(shell grep -m1 DESCRIPTION $(firstword $(SOURCES)) | cut -d\" -f2)
 VERSION = $(shell grep -m1 VERSION $(firstword $(SOURCES)) | cut -d\" -f2)
 AUTHOR = $(shell grep -m1 AUTHOR $(firstword $(SOURCES)) | cut -d\" -f2)
@@ -11,13 +12,11 @@ MAIL := $(shell grep -m1 MAIL $(firstword $(SOURCES)) | cut -d\" -f2 | tr '[A-Za
 URL = $(shell grep -m1 URL $(firstword $(SOURCES)) | cut -d\" -f2)
 LICENSE = $(shell grep -m1 LICENSE $(firstword $(SOURCES)) | cut -d\" -f2)
 
-
 PREFIX = '/usr'
 DESTDIR = ''
 
 CC = clang
 CFLAGS = -lbtrfsutil -std=c11 -Os -Wall -Wextra -pedantic
-
 
 BINARIES = $(notdir $(basename $(SOURCES)))
 INSTALLED_BINARIES = $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(BINARIES))
@@ -26,10 +25,8 @@ INSTALLED_CONFS = $(addprefix $(DESTDIR)/etc/,$(notdir $(CONFS)))
 
 ELFS = $(addsuffix .elf,$(addprefix src/,$(BINARIES)))
 
-PKGNAME = $(EXECUTABLE)
 PKGEXT=.pkg.tar.zst
 ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
-
 
 all: elf
 

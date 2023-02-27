@@ -9,15 +9,16 @@
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
 
-#define PROGRAM     "CleanSnap"
-#define EXECUTABLE  "clsnp"
-#define DESCRIPTION "Clean snapshots in a Btrfs filesystem."
-#define VERSION     "0.1a"
-#define URL         "https://github.com/mdomlop/clsnp"
-#define LICENSE     "GPLv3+"
-#define AUTHOR      "Manuel Domínguez López"
-#define NICK        "mdomlop"
-#define MAIL        "zqbzybc@tznvy.pbz"
+#define PROGRAM      "CleanSnap"
+#define EXECUTABLE   "clsnp"
+#define DESCRIPTION  "Clean snapshots in a Btrfs filesystem."
+#define PKGNAME      "makesnap"
+#define VERSION      "0.1a"
+#define URL          "https://github.com/mdomlop/makesnap"
+#define LICENSE      "GPLv3+"
+#define AUTHOR       "Manuel Domínguez López"
+#define NICK         "mdomlop"
+#define MAIL         "zqbzybc@tznvy.pbz"
 
 #define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
 
