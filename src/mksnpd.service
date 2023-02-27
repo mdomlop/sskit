@@ -4,7 +4,7 @@ Description=MakeSnap BtrFS snapshot daemon.
 [Service]
 UMask=0022
 Type=simple
-PIDFile=/tmp/mksnp.pid
+PIDFile=/tmp/mksnpd.pid
 ExecStart=/usr/bin/mksnpd
 
 [Install]
