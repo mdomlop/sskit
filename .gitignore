@@ -1,5 +1,6 @@
 # Packaging
 pkg
+old
 *.pkg.tar.zst
 PKGBUILD
 
