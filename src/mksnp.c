@@ -1,5 +1,3 @@
-#define _POSIX_SOURCE
-
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h> /* gentenv(), abort() */
@@ -27,7 +25,9 @@
 #define PATH_MAX_STRING_SIZE 256
 
 #define TIMESTAMP "%Y-%m-%d_%H-%M-%S"
-#define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
+
+/* Btrfs has not this limit, but I think this value is very safe. */
+#define SNAPLISTSIZE 64000
 
 FILE *popen(const char *command, const char *mode);
 int pclose(FILE *stream);
@@ -60,8 +60,9 @@ int check_path_size(char *path)
 		//if(sub_path_size > 10)  // Testing
 		if(sub_path_size > PATH_MAX)
 		{
-			fprintf (stderr, "Sorry. Path length is longer (%d) than PATH_MAX (%d):\n"
-					"%s\n", sub_path_size, PATH_MAX, path);
+			fprintf (stderr, "Sorry. Path length is longer (%d) "
+				"than PATH_MAX (%d):\n"
+				"%s\n", sub_path_size, PATH_MAX, path);
 			return 1;
 		}
 	}
@@ -70,12 +71,6 @@ int check_path_size(char *path)
 
 int is_older(char *last, int now, int fq)
 {
-	/* Check if last snapshot in pool is old enough from right now. */
-
-	/*printf("El último snapshot es: %d\n", last);
-	printf("Segundos desde Epoch: %d\n", now);
-	printf("La diferencia es: %d\n", now - last);
-	printf("Debe ser mayor de %d\n", fq); */
 
 	time_t epoch;
 	struct tm my_tm = {0};
@@ -84,7 +79,8 @@ int is_older(char *last, int now, int fq)
 	memset(&my_tm, 0, sizeof(my_tm));
 
 	if (sscanf(last, "%d-%d-%d_%d-%d-%d",
-		&my_tm.tm_year, &my_tm.tm_mon, &my_tm.tm_mday, &my_tm.tm_hour, &my_tm.tm_min, &my_tm.tm_sec) != 6)
+		&my_tm.tm_year, &my_tm.tm_mon, &my_tm.tm_mday,
+		&my_tm.tm_hour, &my_tm.tm_min, &my_tm.tm_sec) != 6)
 	{
 		fprintf(stderr, "Bad TIMESTAMP: sscanf failed\n");
 		return -1;
@@ -118,7 +114,8 @@ int check_is_subvol(char *subvol)
 
     if (!err)
         return 1;
-    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS || err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
+    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS ||
+		err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
         fprintf(stderr,
 				"%s: Is not a btrfs subvolume: %s\n",
 				EXECUTABLE, subvol);
@@ -517,7 +514,7 @@ int main(int argc, char **argv)
 		int poolstatus = 0;
 
 
-		char snap_path[PATH_MAX];  // Path to subvolume/.snapshots/pool/timestamp
+		char snap_path[PATH_MAX];  // Path to subvolume
 		char lastsnap[20];  // The last snapshot in pool YYYY-MM-DD_HH-MM-SS
 
 		// Set timestamp

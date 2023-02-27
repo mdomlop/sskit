@@ -1,4 +1,3 @@
-#define _POSIX_SOURCE
 #include <stdio.h>
 #include <time.h>
 #include <btrfsutil.h>
@@ -20,7 +19,8 @@
 #define NICK         "mdomlop"
 #define MAIL         "zqbzybc@tznvy.pbz"
 
-#define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
+/* Btrfs has not this limit, but I think this value is very safe. */
+#define SNAPLISTSIZE 64000
 
 char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in pool_path
 int snapls_c = 0;  // Number of elements in snaplist
@@ -185,16 +185,9 @@ int main(int argc, char **argv)
 
 	if (pvalue && qvalue)
 	{
-		//printf("Pool: %s\n", pvalue);
-		//printf("Quota: %s\n", qvalue);
-
 		get_snapshots(pvalue);
 
 		diff = snapls_c - quota;
-		//printf("Número de snapshots: %d\n"
-		//	"Diferencia: %d\n", snapls_c, diff);
-
-		//list_snapshots();
 
 		if (diff > 0)
 		{
@@ -214,5 +207,6 @@ int main(int argc, char **argv)
 	}
 	else
 		return 1;
+
 	return 0;
 }
