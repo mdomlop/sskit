@@ -1,7 +1,8 @@
 # Packaging
 pkg
-old
-*.pkg.tar.zst
+*.pkg.tar.*
+*.deb
+*.rpm
 PKGBUILD
 
 # Swap files
@@ -15,3 +16,6 @@ PKGBUILD
 *.i*86
 *.x86_64
 *.hex
+
+# Oldies
+old
