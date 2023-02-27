@@ -15,7 +15,6 @@ LICENSE = $(shell grep -m1 LICENSE $(firstword $(SOURCES)) | cut -d\" -f2)
 PREFIX = '/usr'
 DESTDIR = ''
 
-CC = clang
 CFLAGS = -lbtrfsutil -std=c11 -Os -Wall -Wextra -pedantic
 
 BINARIES = $(notdir $(basename $(SOURCES)))
