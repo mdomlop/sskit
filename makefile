@@ -99,6 +99,7 @@ PKGBUILD:
 	echo 'pkgrel=1' >> $@
 	echo 'pkgdesc="$(DESCRIPTION)"' >> $@
 	echo 'arch=("i686" "x86_64")' >> $@
+	echo 'makedepends=("btrfs-progs")' >> $@
 	echo 'url="$(URL)"' >> $@
 	echo 'source=()' >> $@
 	echo 'license=("$(LICENSE)")' >> $@
