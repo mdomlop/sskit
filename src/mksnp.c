@@ -27,7 +27,6 @@
 #define PATH_MAX_STRING_SIZE 256
 
 #define TIMESTAMP "%Y-%m-%d_%H-%M-%S"
-#define EPOCHSECS "%s"
 #define SNAPLISTSIZE 64000  /* Btrfs has not this limit, but I think this value is very safe. */
 
 FILE *popen(const char *command, const char *mode);
@@ -513,8 +512,7 @@ int main(int argc, char **argv)
 
 	if (ivalue && ovalue && fvalue)
 	{
-		int epochsecs;
-		char epochsecs_str[80];
+		long int epochsecs;
 		char timestamp[80];
 		int poolstatus = 0;
 
@@ -529,9 +527,8 @@ int main(int argc, char **argv)
 		time(&now); // Get current time
 
 		ts = *localtime(&now); // Format time
+		epochsecs = now;
 		strftime(timestamp, sizeof(timestamp), TIMESTAMP, &ts);
-		strftime(epochsecs_str, sizeof(epochsecs_str), EPOCHSECS, &ts);
-		epochsecs = atoi(epochsecs_str);
 
 
 		//puts("Updating snap_path...");
