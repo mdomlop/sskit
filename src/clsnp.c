@@ -1,11 +1,13 @@
+#define _POSIX_SOURCE
 #include <stdio.h>
+#include <time.h>
+#include <btrfsutil.h>
 #include <getopt.h>
-#include <stdlib.h>  // atoi()
+#include <stdlib.h>  // atoi() abort()
 #include <ctype.h>  /* isdigit() isprint() */
 #include <linux/limits.h>  /* for PATH_MAX */
-#include <dirent.h>
+#include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
-#include <unistd.h>  /* unlink() */
 
 #define PROGRAM     "CleanSnap"
 #define EXECUTABLE  "clsnp"
@@ -55,7 +57,7 @@ int get_snapshots(char *pool_path)
 
 	DIR *dp;
 	struct dirent *ep;
-	
+
 	char temp[4096];
 	int n = 0;
 
@@ -83,7 +85,7 @@ int get_snapshots(char *pool_path)
 	*/
 
 	snapls_c = n;
-	
+
 	/* Sort snapshots */
 	for (int i = 0; i < snapls_c; i++)  // No fail when snapls_c is 0
 	{
@@ -97,7 +99,7 @@ int get_snapshots(char *pool_path)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -107,19 +109,32 @@ void list_snapshots(void)
 		printf("[%d]\t%s\n", i, snaplist[i]);
 }
 
+int check_is_subvol(char *subvol)
+{
+    enum btrfs_util_error err;
+    err = btrfs_util_is_subvolume(subvol);
+
+    if (!err)
+        return 1;
+    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS || err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
+        printf("Is NOT a btrfs subvolume: %s\n", subvol);
+    else
+        printf("Is NOT a subvolume: %s\n", subvol);
+
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int hflag, vflag;
 	hflag = vflag = 0;
-	
+
 	char snap_path[PATH_MAX];
 
 	char *pvalue = NULL;  // pool path
 	char *qvalue = NULL;  // quota
-	
+
 	int quota = 0;
-	
-	char cmd[PATH_MAX];
 
 	int c;
 
@@ -157,7 +172,7 @@ int main(int argc, char **argv)
 		fprintf (stderr, "Sorry. Too much arguments.\n");
 		return 1;
 	}
-	
+
 	if(hflag)
 	{
 		help(0);
@@ -166,20 +181,20 @@ int main(int argc, char **argv)
 	{
 		version();
 	}
-	
+
 	if (pvalue && qvalue)
 	{
 		//printf("Pool: %s\n", pvalue);
 		//printf("Quota: %s\n", qvalue);
-		
+
 		get_snapshots(pvalue);
-		
+
 		diff = snapls_c - quota;
 		//printf("Número de snapshots: %d\n"
 		//	"Diferencia: %d\n", snapls_c, diff);
-		
+
 		//list_snapshots();
-		
+
 		if (diff > 0)
 		{
 			for (int i = 0; i<diff; i++)
@@ -187,17 +202,14 @@ int main(int argc, char **argv)
 				strcpy(snap_path, pvalue);
 				strcat(snap_path, "/");
 				strcat(snap_path, snaplist[i]);
-				
-				//printf("Sobra: %s\n", snap_path);
-				//rmdir(snap_path);
-				strcpy(cmd, "btrfs subvolume delete '");
-				strcat(cmd, snap_path);
-				strcat(cmd, "' > /dev/null");
-				system(cmd);
+
+				if (check_is_subvol(snap_path))
+				{
+					btrfs_util_delete_subvolume(snap_path, 0);
+					printf("%s: Snapshot deleted: %s\n", PROGRAM, snap_path);
+				}
 			}
 		}
-		
-		
 	}
 	else
 		return 1;

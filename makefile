@@ -16,7 +16,7 @@ PREFIX = '/usr'
 DESTDIR = ''
 
 CC = clang
-CFLAGS = -std=c11 -Os -Wall -Wextra -pedantic -static
+CFLAGS = -lbtrfsutil -std=c11 -Os -Wall -Wextra -pedantic
 
 
 BINARIES = $(notdir $(basename $(SOURCES)))

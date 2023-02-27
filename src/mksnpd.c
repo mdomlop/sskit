@@ -23,6 +23,7 @@
 #define PIDFILE "/tmp/mksnpd.pid"
 
 int init = 0;  // For executing only once (on application start).
+int sleepsecs = 5;  // Sleep time for daemon.
 
 char configtab[SNAPLISTSIZE][PATH_MAX];  // List of entries for automatic snapshotting
 int configtab_c = 0;  // Number of elements in configtab
@@ -86,9 +87,9 @@ void execconfig(void)
 {
 	char cmd_mksnap[PATH_MAX];
 	char cmd_clsnap[PATH_MAX];
-	
+
 	char auxtab[configtab_c][PATH_MAX];  // List of entries for automatic snapshotting
-	
+
 	// make a copy
 	for (int i = 0; i < configtab_c; i++)
 	{
@@ -101,34 +102,34 @@ void execconfig(void)
 		char pool[PATH_MAX];
 		char freq[8];
 		char  quota[8];
-		
+
 		char delim[] = " ";
 		char *ptr = strtok(auxtab[i], delim);
-		
+
 		if (ptr != NULL)
 		{
 			strcpy(subvol, ptr);
 			ptr = strtok(NULL, delim);
 		} else { exit(1); }
-		
+
 		if (ptr != NULL)
 		{
 			strcpy(pool, ptr);
 			ptr = strtok(NULL, delim);
 		} else { exit(1); }
-		
+
 		if (ptr != NULL)
 		{
 			strcpy(freq, ptr);
 			ptr = strtok(NULL, delim);
 		} else { exit(1); }
-		
+
 		if (ptr != NULL)
 		{
 			strcpy(quota, ptr);
 			ptr = strtok(NULL, delim);
 		} else { exit(1); }
-		
+
 		/* Only execute once if freq is 0 */
 		if ((init != 0) && (atoi(freq) == 0))
 			continue;
@@ -140,21 +141,21 @@ void execconfig(void)
 			strcat(cmd_mksnap, pool);
 			strcat(cmd_mksnap, " -f ");
 			strcat(cmd_mksnap, freq);
-			
+
 			//printf("\n%s\n", cmd_mksnap);
 			system(cmd_mksnap);
-			
-			sleep(2);
-			
+
+			sleep(1);
+
 			strcpy(cmd_clsnap, "clsnp -p ");
 			strcat(cmd_clsnap, pool);
 			strcat(cmd_clsnap, " -q ");
 			strcat(cmd_clsnap, quota);
-			
+
 			//printf("\n%s\n", cmd_clsnap);
 			system(cmd_clsnap);
 		}
-		
+
 		init = 1;  // Switch it to 1 for skip 0 freqs
 	}
 }
@@ -197,7 +198,7 @@ void handle_sigusr1(int sig)  // Write fifo and pull server to read clientfifo
 	printf("Recibida señal: %d (USR1)\n", sig);
 }
 void handle_sigusr2(int sig)  // Write fifo and pull server to read clientfifo
-{	
+{
 	printf("Recibida señal: %d (USR2)\n", sig);
 }
 
@@ -207,8 +208,8 @@ int main(void)
 	// printconfig();
 
 	writepid();
-	puts("Daemonize!");
-	printf("PID is: %d\n", getpid());
+	//puts("Daemonize!");
+	//printf("PID is: %d\n", getpid());
 	for (;;)
 	{
 		signal(SIGTERM, handle_sigterm);
@@ -216,11 +217,11 @@ int main(void)
 		signal(SIGINT, handle_sigint);
 		signal(SIGUSR1, handle_sigusr1);  // read fifo
 		signal(SIGUSR2, handle_sigusr2);  // read fifo
-		
+
 		execconfig();
-		sleep(5);
+		sleep(sleepsecs);
 	}
-	
+
 	unlink(PIDFILE);
 	return 0;
 }

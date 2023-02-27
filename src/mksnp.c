@@ -1,7 +1,9 @@
+#define _POSIX_SOURCE
+
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h> /* gentenv(), abort() */
-#include <unistd.h> /* uid, euid */
+#include <unistd.h> /* geteuid() */
 #include <string.h> /* strlen() */
 #include <time.h>
 #include <linux/limits.h>  /* for PATH_MAX */
@@ -9,6 +11,7 @@
 #include <sys/stat.h>  /* for check directory */
 #include <ctype.h>  /* isdigit() */
 #include <dirent.h>
+#include <btrfsutil.h>
 
 
 
@@ -109,67 +112,55 @@ int is_older(char *last, int now, int fq)
 		return 1;
 	return 0;
 }
-int check_cmdout(char *cmd, char *buffer)
+
+
+int check_is_subvol(char *subvol)
 {
-    int lines;
+    enum btrfs_util_error err;
+    err = btrfs_util_is_subvolume(subvol);
 
-    FILE *fp;
-    /* Open the command for reading. */
-    fp = popen(cmd, "r");
-    if (fp == NULL)
-    {
-        fprintf(stderr, "Failed to run command: %s\n", cmd);
-        exit(1);
-    }
-
-    /* Read the output a line at a time - output it. */
-    lines = 0;
-    while (fgets(buffer, 256, fp) != NULL)
-        lines++;
-
-    /* close */
-    pclose(fp);
-
-    if (lines == 1)  // Returns true if generation is captured or no changes happened.
+    if (!err)
         return 1;
+    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS || err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
+        fprintf(stderr,
+				"%s: Is not a btrfs subvolume: %s\n",
+				EXECUTABLE, subvol);
+    else
+        fprintf(stderr,
+				"%s: Is not a subvolume: %s\n",
+				EXECUTABLE, subvol);
 
     return 0;
 }
 
-int has_changed(char *last, char *orig, char *pool)
+int has_changed(char *last, char *src, char *pool)
 {
 	/* Check last snapshot generation. If original subvolume and last
 	 * snapshot is greater than one line, means that original is different
 	 * from last subvolume. */
 
-	char cmd[256];
-	char buffer[1024];
+    long unsigned int srcgen = 0;
+    long unsigned int dstgen = 0;
 
-	strcpy(cmd, "btrfs subvolume show '");
-	strcat(cmd, pool);
-	strcat(cmd, "/");
-	strcat(cmd, last);
-	strcat(cmd, "' ");
-    strcat(cmd, "| grep Generation | cut -d: -f2| tr -d '[:space:]'");
+	char dst[256];  // Last snapshot
 
-    //printf("%s\n", cmd);
+	strcpy(dst, pool);
+	strcat(dst, "/");
+	strcat(dst, last);
 
-    if (check_cmdout(cmd, buffer))  // Generation number is in buffer.
+    if (check_is_subvol(src) && check_is_subvol(dst))
     {
+        struct btrfs_util_subvolume_info info;
 
-        strcpy(cmd, "btrfs subvolume find-new '");
-        strcat(cmd, orig);
-        strcat(cmd, "' ");
-        strcat(cmd, buffer);
-        strcat(cmd, "");
+        btrfs_util_subvolume_info(src, 0, &info);
+        srcgen = info.generation;
 
-        //printf("%s\n", cmd);
-
-        if (!check_cmdout(cmd, buffer))  // If more than one line in cmd output
-            return 1;  // Has changed
+        btrfs_util_subvolume_info(dst, 0, &info);
+        dstgen = info.generation;
     }
 
-	return 0;  // Not has changed
+    /* If diff is more than 0, subvolumes are different */
+	return srcgen - dstgen;
 }
 
 int is_dir(char *dir)
@@ -336,7 +327,7 @@ int mkpool(char *pool_path)
 	}
 	else
 	{
-		printf("Creating pool: %s\n", pool_path);
+		//printf("Creating pool: %s\n", pool_path);
 		int ret = 0;
 		//ret = mkdir (pool_path, 0755);
 		ret = mkdir_p(pool_path, 0777);
@@ -415,7 +406,7 @@ void get_snapshots(char *pool_path)
 	*/
 
 	snapls_c = n;
-	
+
 	/* Sort snapshots */
 	for (int i = 0; i < snapls_c; i++)  // No fail when snapls_c is 0
 	{
@@ -439,43 +430,19 @@ void list_snapshots(void)
 	}
 }
 
-int make_snapshot(char *subv_path, char *snap_path)
+
+int make_snapshot(char *src, char *dst)
 {
-	char cmd[PATH_MAX];
-	int ret = 0;
-															
-	strcpy(cmd, "btrfs subvolume snapshot -r '");
-	strcat(cmd, subv_path);
-	strcat(cmd, "' '");
-	strcat(cmd, snap_path);
-	strcat(cmd, "' > /dev/null");
+    if (check_is_subvol(src))
+    {
+        if(btrfs_util_create_snapshot(src, dst,
+                                   BTRFS_UTIL_CREATE_SNAPSHOT_READ_ONLY,
+                                   NULL, NULL) == BTRFS_UTIL_OK)
+        return 1;
+    }
 
-	/*
-	strcpy(cmd, "mkdir '");
-	strcat(cmd, snap_path);
-	strcat(cmd, "' > /dev/null");
-	*/
+	fprintf(stderr, "Unable to create snapshot '%s'\n", dst);
 
-
-	//printf("Command: %s\n", cmd);
-
-
-	if (is_dir(snap_path))
-	{
-		fprintf(stderr, "Sorry. Too fast '%s'\n", snap_path);
-		return 0;  // Directory alredy exists
-	}
-
-	//ret = mkdir (snap_path, 0755);
-	ret = system(cmd);
-
-	if (ret)
-	{
-		fprintf(stderr, "Unable to create snapshot '%s'\n", snap_path);
-		return 1;
-	}
-
-	//printf("Create snapshot of '%s' in '%s'\n", subv_path, snap_path);
 	return 0;
 }
 
@@ -583,7 +550,7 @@ int main(int argc, char **argv)
 		{
 			get_snapshots(ovalue);
 			strcpy(lastsnap, snaplist[snapls_c - 1]);
-			printf("Último snapshot: %s\n", lastsnap);
+			//printf("mksnp: Último snapshot: %s/%s\n", ovalue, lastsnap);
 
 			if (!is_older(lastsnap, epochsecs, freq))
 			{
@@ -595,7 +562,7 @@ int main(int argc, char **argv)
 				//printf("No ha cambiado: %s/%s\n", ovalue, lastsnap);
 				return 1;
 			}
-			printf("SÍ ha cambiado: %s/%s\n", ovalue, lastsnap);
+			printf("%s: New snapshot: %s/%s\n", PROGRAM, ovalue, lastsnap);
 			make_snapshot(ivalue, snap_path);
 			//else
 			//	fprintf(stderr,"Muy pronto para un snapshot\n");

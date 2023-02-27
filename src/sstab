@@ -2,56 +2,31 @@
 # Snapshots table is part of mksnp tools, but can be used for others.
 # Only lines wich starts with '/' character will be procesed.
 
+# First field is the source btrfs subvolume, the second one is the pool,
+# a directory where snapshots will be stored.
 
-# subvolume    pool                                        frequency    quota
+# Third field is the frequency in which snapshots will be captured and stored.
+# If this is 0, means that only once (on program start) will be checked.
+# Append s, m, h, d or y to say seconds, minutes, hours, days or years. If no
+# character is appened, then means seconds.
+
+# And fourth field (quota) is how many snapshots will be stored in pool. When
+# this number was reached, the olders snapshots will be deleted until total
+# snapshots does not exceed quota number.
+
+
+# subvolume    pool                           frequency    quota
 #############################################################################
 
 # On boot
-/              /backup/ESCRITORIO/mksnp/arch.escritorio/boot       0            30
-/home          /backup/ESCRITORIO/mksnp/home.arch/boot             0            30
-/srv           /backup/ESCRITORIO/mksnp/srv/boot                   0            30
-/home/mdl/Documentos    /backup/DATOS/mksnp/usuarios/mdl/boot      0            30
-/home/laura/Documentos  /backup/DATOS/mksnp/usuarios/laura/boot    0            30
-/home/julia/Documentos  /backup/DATOS/mksnp/usuarios/julia/boot    0            30
-/Aplicaciones           /backup/DATOS/mksnp/Aplicaciones/boot      0            30
-/Multimedia/Biblioteca  /backup/DATOS/mksnp/Biblioteca/boot        0            30
-/Multimedia/Casa        /backup/DATOS/mksnp/Casa/boot              0            30
-/Multimedia/Discoteca   /backup/DATOS/mksnp/Discoteca/boot         0            30
-/Multimedia/Fotos       /backup/DATOS/mksnp/Fotos/boot             0            30
-/Multimedia/Imágenes    /backup/DATOS/mksnp/Imágenes/boot          0            30
-/Multimedia/Vídeos      /backup/DATOS/mksnp/Vídeos/boot            0            30
-/Multimedia/Infantil    /backup/DATOS/mksnp/Infantil/boot          0            30
+/                        /backup/mksnp/system/boot       0            30
+#/home                   /backup/mksnp/home/boot         0            30
 
 # Daily
-/           /backup/ESCRITORIO/mksnp/arch.escritorio/daily         1d           30
-/home       /backup/ESCRITORIO/mksnp/home.arch/daily               1d           30
-/srv        /backup/ESCRITORIO/mksnp/srv/daily                     1d           30
-/home/mdl/Documentos    /backup/DATOS/mksnp/usuarios/mdl/daily     1d           30
-/home/laura/Documentos  /backup/DATOS/mksnp/usuarios/laura/daily   1d           30
-/home/julia/Documentos  /backup/DATOS/mksnp/usuarios/julia/daily   1d           30
-/Aplicaciones           /backup/DATOS/mksnp/Aplicaciones/daily     1d           30
-/Multimedia/Biblioteca  /backup/DATOS/mksnp/Biblioteca/daily       1d           30
-/Multimedia/Casa        /backup/DATOS/mksnp/Casa/daily             1d           30
-/Multimedia/Discoteca   /backup/DATOS/mksnp/Discoteca/daily        1d           30
-/Multimedia/Fotos       /backup/DATOS/mksnp/Fotos/daily            1d           30
-/Multimedia/Imágenes    /backup/DATOS/mksnp/Imágenes/daily         1d           30
-/Multimedia/Vídeos      /backup/DATOS/mksnp/Vídeos/daily           1d           30
-/Multimedia/Infantil    /backup/DATOS/mksnp/Infantil/daily         1d           30
+/                        /backup/mksnp/system/daily      1d           30
 
 # Hourly
-/home/mdl/Documentos    /backup/DATOS/mksnp/usuarios/mdl/hourly     1h          30
-/home/laura/Documentos  /backup/DATOS/mksnp/usuarios/laura/hourly   1h          30
-/home/julia/Documentos  /backup/DATOS/mksnp/usuarios/julia/hourly   1h          30
-/Aplicaciones           /backup/DATOS/mksnp/Aplicaciones/hourly     1h          30
-/Multimedia/Biblioteca  /backup/DATOS/mksnp/Biblioteca/hourly       1h          30
-/Multimedia/Casa        /backup/DATOS/mksnp/Casa/hourly             1h          30
-/Multimedia/Discoteca   /backup/DATOS/mksnp/Discoteca/hourly        1h          30
-/Multimedia/Fotos       /backup/DATOS/mksnp/Fotos/hourly            1h          30
-/Multimedia/Imágenes    /backup/DATOS/mksnp/Imágenes/hourly         1h          30
-/Multimedia/Vídeos      /backup/DATOS/mksnp/Vídeos/hourly           1h          30
-/Multimedia/Infantil    /backup/DATOS/mksnp/Infantil/hourly         1h          30
+#/home                   /backup/mksnp/home/hourly       1h           30
 
 # 30m
-/home/mdl/Documentos    /backup/DATOS/mksnp/usuarios/mdl/30m        30m         30
-/home/laura/Documentos  /backup/DATOS/mksnp/usuarios/laura/30m      30m         30
-/home/julia/Documentos  /backup/DATOS/mksnp/usuarios/julia/30m      30m         30
+#/home/mdl/Documentos    /backup/mksnp/mydocs/30m        30m          50
