@@ -552,7 +552,15 @@ int main(int argc, char **argv)
 		if (poolstatus == 2)  // Alredy exists
 		{
 			get_snapshots(ovalue);
-			strcpy(lastsnap, snaplist[snapls_c - 1]);
+
+			if (snapls_c)  // Directory is not empty, get the lastsnap
+				strcpy(lastsnap, snaplist[snapls_c - 1]);
+			else  // Directory is empty, make a snapshot without looking any more
+			{
+				if (DEBUG) printf("debug: Directory is empty, make a snapshot without looking any more: %s\n", ovalue);
+				make_snapshot(ivalue, snap_path);
+				return 0;
+			}
 
 			//printf("mksnp: Último snapshot: %s/%s\n", ovalue, lastsnap);
 
@@ -590,12 +598,14 @@ int main(int argc, char **argv)
 			else
 			{
 				fprintf(stderr, "Unknown error from is_older() function.");
+				return 1;
 			}
-			//else
-			//	fprintf(stderr,"Muy pronto para un snapshot\n");
 		}
 		else if (poolstatus == 1)  // New pool
+		{
 			make_snapshot(ivalue, snap_path);
+			return 0;
+		}
 		else
 		{
 			fprintf(stderr,"Fallo al crear pool_path: %s\n", ovalue);
