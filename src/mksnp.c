@@ -29,7 +29,7 @@
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000
 
-#define DEBUG 1
+#define DEBUG 0
 
 FILE *popen(const char *command, const char *mode);
 int pclose(FILE *stream);
@@ -281,7 +281,7 @@ long unsigned int has_changed(char *last, char *src, char *pool)
     /* If diff is more than 0, subvolumes are different */
 	diff = srcgen - dstgen;
 
-	printf("debug: Generation. src: %ld, dst: %ld, diff: %ld, subv: %s\n", srcgen, dstgen, diff, dst);
+	if (DEBUG) printf("debug: Generation. src: %ld, dst: %ld, diff: %ld, subv: %s\n", srcgen, dstgen, diff, dst);
 	return diff;
 }
 
@@ -374,9 +374,6 @@ int mkpool(char *pool_path)
 void get_snapshots(char *pool_path)
 {
 
-//char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in pool_path
-//int snapls_c = 0;  // Number of elements in snaplist
-
 	//printf("Reloading snapshots from %s\n", pool_path);
 
 	DIR *dp;
@@ -410,16 +407,19 @@ void get_snapshots(char *pool_path)
 
 	snapls_c = n;
 
-	/* Sort snapshots */
-	for (int i = 0; i < snapls_c; i++)  // No fail when snapls_c is 0
+	if (snapls_c)
 	{
-		for (int j = 0; j < snapls_c -1 -i; j++)
+		/* Sort snapshots */
+		for (int i = 0; i < snapls_c; i++)  // No fail when snapls_c is 0
 		{
-			if (strcmp(snaplist[j], snaplist[j+1]) > 0)
+			for (int j = 0; j < snapls_c -1 -i; j++)
 			{
-				strcpy(temp, snaplist[j]);
-				strcpy(snaplist[j], snaplist[j+1]);
-				strcpy(snaplist[j+1], temp);
+				if (strcmp(snaplist[j], snaplist[j+1]) > 0)
+				{
+					strcpy(temp, snaplist[j]);
+					strcpy(snaplist[j], snaplist[j+1]);
+					strcpy(snaplist[j+1], temp);
+				}
 			}
 		}
 	}
@@ -549,9 +549,11 @@ int main(int argc, char **argv)
 
 		poolstatus = mkpool(ovalue);
 
-		if (poolstatus == 2)  // Alredy exists
+		if (poolstatus == 2)  // Alredy exists, maybe be empty
 		{
 			get_snapshots(ovalue);
+
+			if (DEBUG) printf("debug: %d snapshots (%s)\n", snapls_c, ovalue);
 
 			if (snapls_c)  // Directory is not empty, get the lastsnap
 				strcpy(lastsnap, snaplist[snapls_c - 1]);
@@ -603,6 +605,7 @@ int main(int argc, char **argv)
 		}
 		else if (poolstatus == 1)  // New pool
 		{
+			if (DEBUG) printf("debug: Directory is empty (new), make a snapshot without looking any more: %s\n", ovalue);
 			make_snapshot(ivalue, snap_path);
 			return 0;
 		}
