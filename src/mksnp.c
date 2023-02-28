@@ -252,12 +252,12 @@ int is_older(char *last, int now, int fq)
 
 long unsigned int has_changed(char *last, char *src, char *pool)
 {
-	/* Check last snapshot generation. If original subvolume and last
-	 * snapshot is greater than one line, means that original is different
-	 * from last subvolume. */
+	/* Check last snapshot ctime (Time when an inode in this subvolume
+	 * was last changed). If src ctime is greater than dst, means that
+	 * original is different from last subvolume. */
 
-    long unsigned int srcgen = 0;
-    long unsigned int dstgen = 0;
+    long unsigned int src_ctime = 0;
+    long unsigned int dst_ctime = 0;
 	long unsigned int diff = 0;
 
 
@@ -272,16 +272,16 @@ long unsigned int has_changed(char *last, char *src, char *pool)
         struct btrfs_util_subvolume_info info;
 
         btrfs_util_subvolume_info(src, 0, &info);
-        srcgen = info.generation;
+        src_ctime = info.ctime.tv_sec;
 
         btrfs_util_subvolume_info(dst, 0, &info);
-        dstgen = info.generation;
+        dst_ctime = info.ctime.tv_sec;
     }
 
     /* If diff is more than 0, subvolumes are different */
-	diff = srcgen - dstgen;
+	diff = src_ctime - dst_ctime;
 
-	if (DEBUG) printf("debug: Generation. src: %ld, dst: %ld, diff: %ld, subv: %s\n", srcgen, dstgen, diff, dst);
+	if (DEBUG) printf("debug: CTime. src: %ld, dst: %ld, diff: %ld, subv: %s\n", src_ctime, dst_ctime, diff, dst);
 	return diff;
 }
 
