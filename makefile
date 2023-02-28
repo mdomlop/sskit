@@ -1,4 +1,4 @@
-SOURCES = src/mksnp.c src/mksnpd.c src/clsnp.c
+SOURCES = src/mksnp.c src/mksnpd.c src/clsnp.c src/snpinfo.c
 SERVICES = src/mksnpd.service
 CONFS = src/sstab
 
