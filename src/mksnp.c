@@ -29,6 +29,8 @@
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000
 
+#define DEBUG 1
+
 FILE *popen(const char *command, const char *mode);
 int pclose(FILE *stream);
 
@@ -37,135 +39,6 @@ char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in pool_path
 int snapls_c = 0;  // Number of elements in snaplist
 
 size_t strnlen(const char s[], size_t maxlen);
-
-int check_root(void)
-{
-	int uid = getuid();
-	int euid = geteuid();
-	if (uid != 0 || uid != euid)
-	{
-		fprintf(stderr, "You must to be root for do this.\n");
-		return 1;
-	}
-	return 0;
-}
-
-
-int check_path_size(char *path)
-{
-	if (path)
-	{
-		int sub_path_size = strlen(path);
-
-		//if(sub_path_size > 10)  // Testing
-		if(sub_path_size > PATH_MAX)
-		{
-			fprintf (stderr, "Sorry. Path length is longer (%d) "
-				"than PATH_MAX (%d):\n"
-				"%s\n", sub_path_size, PATH_MAX, path);
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int is_older(char *last, int now, int fq)
-{
-
-	time_t epoch;
-	struct tm my_tm = {0};
-	//char buffer[80];
-
-	memset(&my_tm, 0, sizeof(my_tm));
-
-	if (sscanf(last, "%d-%d-%d_%d-%d-%d",
-		&my_tm.tm_year, &my_tm.tm_mon, &my_tm.tm_mday,
-		&my_tm.tm_hour, &my_tm.tm_min, &my_tm.tm_sec) != 6)
-	{
-		fprintf(stderr, "Bad TIMESTAMP: sscanf failed\n");
-		return -1;
-	}
-
-	my_tm.tm_isdst = -1;
-	my_tm.tm_year -= 1900;
-	my_tm.tm_mon -= 1;
-
-	epoch = mktime(&my_tm);
-
-	if (epoch == -1)
-		fprintf(stderr, "Error: unable to make time using mktime\n");
-	/*
-	else {
-		strftime(buffer, sizeof(buffer), "%c", &my_tm);
-		printf("%s  (epoch=%ld)\n", buffer, (long)epoch);
-	}
-*/
-	//return (long)epoch;
-	if ((now - (long)epoch) > fq)
-		return 1;
-	return 0;
-}
-
-
-int check_is_subvol(char *subvol)
-{
-    enum btrfs_util_error err;
-    err = btrfs_util_is_subvolume(subvol);
-
-    if (!err)
-        return 1;
-    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS ||
-		err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
-        fprintf(stderr,
-				"%s: Is not a btrfs subvolume: %s\n",
-				EXECUTABLE, subvol);
-    else
-        fprintf(stderr,
-				"%s: Is not a subvolume: %s\n",
-				EXECUTABLE, subvol);
-
-    return 0;
-}
-
-int has_changed(char *last, char *src, char *pool)
-{
-	/* Check last snapshot generation. If original subvolume and last
-	 * snapshot is greater than one line, means that original is different
-	 * from last subvolume. */
-
-    long unsigned int srcgen = 0;
-    long unsigned int dstgen = 0;
-
-	char dst[256];  // Last snapshot
-
-	strcpy(dst, pool);
-	strcat(dst, "/");
-	strcat(dst, last);
-
-    if (check_is_subvol(src) && check_is_subvol(dst))
-    {
-        struct btrfs_util_subvolume_info info;
-
-        btrfs_util_subvolume_info(src, 0, &info);
-        srcgen = info.generation;
-
-        btrfs_util_subvolume_info(dst, 0, &info);
-        dstgen = info.generation;
-    }
-
-    /* If diff is more than 0, subvolumes are different */
-	return srcgen - dstgen;
-}
-
-int is_dir(char *dir)
-{ /* Check if directory alredy exists. */
-	struct stat sb;
-
-	if (stat(dir, &sb) == 0 && S_ISDIR(sb.st_mode))
-		return 1;  // Directory alredy exists
-	return 0;
-}
-
 
 void version (void)
 {
@@ -193,6 +66,225 @@ void help (int error)
 		printf ("%s\n", text);
 	}
 }
+
+
+int check_root(void)
+{
+	int uid = getuid();
+	int euid = geteuid();
+	if (uid != 0 || uid != euid)
+	{
+		fprintf(stderr, "You must to be root for do this.\n");
+		return 1;
+	}
+	return 0;
+}
+
+
+/* recursive mkdir */
+int mkdir_p(const char *dir, const mode_t mode) {
+	char tmp[PATH_MAX_STRING_SIZE];
+	char *p = NULL;
+	struct stat sb;
+	size_t len;
+
+	/* copy path */
+	len = strnlen (dir, PATH_MAX_STRING_SIZE);
+	if (len == 0 || len == PATH_MAX_STRING_SIZE) {
+		return -1;
+	}
+	memcpy (tmp, dir, len);
+	tmp[len] = '\0';
+
+	/* remove trailing slash */
+	if(tmp[len - 1] == '/') {
+		tmp[len - 1] = '\0';
+	}
+
+	/* check if path exists and is a directory */
+	if (stat (tmp, &sb) == 0) {
+		if (S_ISDIR (sb.st_mode)) {
+			return 0;
+		}
+	}
+
+	/* recursive mkdir */
+	for(p = tmp + 1; *p; p++) {
+		if(*p == '/') {
+			*p = 0;
+			/* test path */
+			if (stat(tmp, &sb) != 0) {
+				/* path does not exist - create directory */
+				if (mkdir(tmp, mode) < 0) {
+					return -1;
+				}
+			} else if (!S_ISDIR(sb.st_mode)) {
+				/* not a directory */
+				return -1;
+			}
+			*p = '/';
+		}
+	}
+	/* test path */
+	if (stat(tmp, &sb) != 0) {
+		/* path does not exist - create directory */
+		if (mkdir(tmp, mode) < 0) {
+			return -1;
+		}
+	} else if (!S_ISDIR(sb.st_mode)) {
+		/* not a directory */
+		return -1;
+	}
+	return 0;
+}
+
+
+int check_path_size(char *path)
+{
+	if (path)
+	{
+		int sub_path_size = strlen(path);
+
+		//if(sub_path_size > 10)  // Testing
+		if(sub_path_size > PATH_MAX)
+		{
+			fprintf (stderr, "Sorry. Path length is longer (%d) "
+				"than PATH_MAX (%d):\n"
+				"%s\n", sub_path_size, PATH_MAX, path);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+int check_if_subvol(char *where)
+{
+	struct stat sb;
+	size_t inode;
+
+	if (stat(where, &sb) == -1)
+	{
+		perror("stat");
+		exit(EXIT_FAILURE);
+	}
+
+	//printf("I-node number %s: %ld\n", where, (long) sb.st_ino);
+
+	inode = (long) sb.st_ino;
+
+	switch (inode)
+	{
+		case 2:
+		case 256:
+			return 0;
+		default:
+			return 1;
+	}
+}
+
+int check_is_subvol(char *subvol)
+{
+    enum btrfs_util_error err;
+    err = btrfs_util_is_subvolume(subvol);
+
+    if (!err)
+        return 1;
+    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS ||
+		err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
+        fprintf(stderr,
+				"%s: Is not a btrfs subvolume: %s\n",
+				EXECUTABLE, subvol);
+    else
+        fprintf(stderr,
+				"%s: Is not a subvolume: %s\n",
+				EXECUTABLE, subvol);
+
+    return 0;
+}
+
+
+int is_dir(char *dir)
+{ /* Check if directory alredy exists. */
+	struct stat sb;
+
+	if (stat(dir, &sb) == 0 && S_ISDIR(sb.st_mode))
+		return 1;  // Directory alredy exists
+	return 0;
+}
+
+
+int is_older(char *last, int now, int fq)
+{
+
+	time_t epoch;
+	struct tm my_tm = {0};
+	//char buffer[80];
+
+	memset(&my_tm, 0, sizeof(my_tm));
+
+	if (sscanf(last, "%d-%d-%d_%d-%d-%d",
+		&my_tm.tm_year, &my_tm.tm_mon, &my_tm.tm_mday,
+		&my_tm.tm_hour, &my_tm.tm_min, &my_tm.tm_sec) != 6)
+		return -1;  // BAD timestamp pattern sscanf
+
+	my_tm.tm_isdst = -1;
+	my_tm.tm_year -= 1900;
+	my_tm.tm_mon -= 1;
+
+	epoch = mktime(&my_tm);
+
+	if (epoch == -1)
+		return -2;  // Unable to make time using mktime
+	/*
+	else {
+		strftime(buffer, sizeof(buffer), "%c", &my_tm);
+		printf("%s  (epoch=%ld)\n", buffer, (long)epoch);
+	}
+*/
+	//return (long)epoch;
+	if ((now - (long)epoch) > fq)
+		return 1;  // Yes, it's older enough
+
+	return 0;  // It's not older enough
+}
+
+
+long unsigned int has_changed(char *last, char *src, char *pool)
+{
+	/* Check last snapshot generation. If original subvolume and last
+	 * snapshot is greater than one line, means that original is different
+	 * from last subvolume. */
+
+    long unsigned int srcgen = 0;
+    long unsigned int dstgen = 0;
+	long unsigned int diff = 0;
+
+
+	char dst[256];  // Last snapshot
+
+	strcpy(dst, pool);
+	strcat(dst, "/");
+	strcat(dst, last);
+
+    if (check_is_subvol(src) && check_is_subvol(dst))
+    {
+        struct btrfs_util_subvolume_info info;
+
+        btrfs_util_subvolume_info(src, 0, &info);
+        srcgen = info.generation;
+
+        btrfs_util_subvolume_info(dst, 0, &info);
+        dstgen = info.generation;
+    }
+
+    /* If diff is more than 0, subvolumes are different */
+	diff = srcgen - dstgen;
+
+	printf("debug: Generation. src: %ld, dst: %ld, diff: %ld, subv: %s\n", srcgen, dstgen, diff, dst);
+	return diff;
+}
+
 
 
 int timetosecs(char *s)
@@ -254,64 +346,6 @@ int timetosecs(char *s)
 }
 
 
-
-/* recursive mkdir */
-int mkdir_p(const char *dir, const mode_t mode) {
-	char tmp[PATH_MAX_STRING_SIZE];
-	char *p = NULL;
-	struct stat sb;
-	size_t len;
-
-	/* copy path */
-	len = strnlen (dir, PATH_MAX_STRING_SIZE);
-	if (len == 0 || len == PATH_MAX_STRING_SIZE) {
-		return -1;
-	}
-	memcpy (tmp, dir, len);
-	tmp[len] = '\0';
-
-	/* remove trailing slash */
-	if(tmp[len - 1] == '/') {
-		tmp[len - 1] = '\0';
-	}
-
-	/* check if path exists and is a directory */
-	if (stat (tmp, &sb) == 0) {
-		if (S_ISDIR (sb.st_mode)) {
-			return 0;
-		}
-	}
-
-	/* recursive mkdir */
-	for(p = tmp + 1; *p; p++) {
-		if(*p == '/') {
-			*p = 0;
-			/* test path */
-			if (stat(tmp, &sb) != 0) {
-				/* path does not exist - create directory */
-				if (mkdir(tmp, mode) < 0) {
-					return -1;
-				}
-			} else if (!S_ISDIR(sb.st_mode)) {
-				/* not a directory */
-				return -1;
-			}
-			*p = '/';
-		}
-	}
-	/* test path */
-	if (stat(tmp, &sb) != 0) {
-		/* path does not exist - create directory */
-		if (mkdir(tmp, mode) < 0) {
-			return -1;
-		}
-	} else if (!S_ISDIR(sb.st_mode)) {
-		/* not a directory */
-		return -1;
-	}
-	return 0;
-}
-
 int mkpool(char *pool_path)
 {
 	if (is_dir(pool_path))
@@ -335,31 +369,6 @@ int mkpool(char *pool_path)
 
 	printf("New pool created: %s\n", pool_path);
 	return 1;
-}
-
-int check_if_subvol(char *where)
-{
-	struct stat sb;
-	size_t inode;
-
-	if (stat(where, &sb) == -1)
-	{
-		perror("stat");
-		exit(EXIT_FAILURE);
-	}
-
-	//printf("I-node number %s: %ld\n", where, (long) sb.st_ino);
-
-	inode = (long) sb.st_ino;
-
-	switch (inode)
-	{
-		case 2:
-		case 256:
-			return 0;
-		default:
-			return 1;
-	}
 }
 
 void get_snapshots(char *pool_path)
@@ -454,6 +463,18 @@ int main(int argc, char **argv)
 
 	int c;
 
+	char snap_path[PATH_MAX];  // Path to subvolume
+	char lastsnap[20];  // The last snapshot in pool YYYY-MM-DD_HH-MM-SS
+
+	long int epochsecs;
+	char timestamp[80];
+	int poolstatus = 0;
+
+	time_t now;
+	struct tm ts;
+
+	int is_older_ret;
+
 	while ((c = getopt (argc, argv, "i:o:f:hv")) != -1)
 		switch (c)
 		{
@@ -492,6 +513,7 @@ int main(int argc, char **argv)
 				abort ();
 		}
 
+
 	if (argc - optind > 0)  // Max non-option argumets are 0
 	{
 		fprintf (stderr, "Sorry. Too much arguments.\n");
@@ -509,18 +531,7 @@ int main(int argc, char **argv)
 
 	if (ivalue && ovalue && fvalue)
 	{
-		long int epochsecs;
-		char timestamp[80];
-		int poolstatus = 0;
-
-
-		char snap_path[PATH_MAX];  // Path to subvolume
-		char lastsnap[20];  // The last snapshot in pool YYYY-MM-DD_HH-MM-SS
-
 		// Set timestamp
-		time_t now;
-		struct tm ts;
-
 		time(&now); // Get current time
 
 		ts = *localtime(&now); // Format time
@@ -542,20 +553,44 @@ int main(int argc, char **argv)
 		{
 			get_snapshots(ovalue);
 			strcpy(lastsnap, snaplist[snapls_c - 1]);
+
 			//printf("mksnp: Último snapshot: %s/%s\n", ovalue, lastsnap);
 
-			if (!is_older(lastsnap, epochsecs, freq))
+			is_older_ret = is_older(lastsnap, epochsecs, freq);
+
+			if (is_older_ret == 0)
 			{
-				//printf("No es viejo: %s/%s\n", ovalue, lastsnap);
+				//if (DEBUG) printf("debug: No. It is not older enough: %s/%s\n", ovalue,lastsnap);
+				return 0;
+			}
+			else if (is_older_ret == 1)
+			{
+				if (has_changed(lastsnap, ivalue, ovalue))
+				{
+					printf("%s: New snapshot: %s/%s\n",
+						   PROGRAM, ovalue, lastsnap);
+					make_snapshot(ivalue, snap_path);
+				}
+				else
+				{
+					if (DEBUG) printf("debug: Yes. It'older enough, but not has changed.\n");
+					return 0;
+				}
+			}
+			else if (is_older_ret == -1)
+			{
+				fprintf(stderr, "Bad TIMESTAMP: sscanf failed\n");
 				return 1;
 			}
-			if (!has_changed(lastsnap, ivalue, ovalue))
+			else if (is_older_ret == -2)
 			{
-				//printf("No ha cambiado: %s/%s\n", ovalue, lastsnap);
+				fprintf(stderr, "Error: unable to make time using mktime\n");
 				return 1;
 			}
-			printf("%s: New snapshot: %s/%s\n", PROGRAM, ovalue, lastsnap);
-			make_snapshot(ivalue, snap_path);
+			else
+			{
+				fprintf(stderr, "Unknown error from is_older() function.");
+			}
 			//else
 			//	fprintf(stderr,"Muy pronto para un snapshot\n");
 		}
