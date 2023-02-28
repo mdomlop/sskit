@@ -104,12 +104,6 @@ int get_snapshots(char *pool_path)
 	return 0;
 }
 
-void list_snapshots(void)
-{
-	for (int i = 0; i < snapls_c; i++)  // No fail when snapls_c is 0
-		printf("[%d]\t%s\n", i, snaplist[i]);
-}
-
 int check_is_subvol(char *subvol)
 {
     enum btrfs_util_error err;
