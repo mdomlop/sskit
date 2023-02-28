@@ -23,7 +23,7 @@
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000
 
-int init = 0;  // For executing only once (on application start).
+int initboot = 1;  // For executing only once (on application start).
 int sleepsecs = 5;  // Sleep time for daemon.
 
 /* List of entries for automatic snapshotting */
@@ -89,10 +89,41 @@ void printconfig(void)
 		printf("%s\n", configtab[i]);
 }
 
-void execconfig(void)
+
+void commands(char *subv, char *pool, char *freq, char *quota)
 {
 	char cmd_mksnap[PATH_MAX];
 	char cmd_clsnap[PATH_MAX];
+
+	strcpy(cmd_mksnap, "mksnp -i ");
+	strcat(cmd_mksnap, subv);
+	strcat(cmd_mksnap, " -o ");
+	strcat(cmd_mksnap, pool);
+	strcat(cmd_mksnap, " -f ");
+	strcat(cmd_mksnap, freq);
+
+	//printf("\n%s\n", cmd_mksnap);
+	system(cmd_mksnap);
+
+	sleep(1);  // A short breath. Maybe not necessary
+
+	strcpy(cmd_clsnap, "clsnp -p ");
+	strcat(cmd_clsnap, pool);
+	strcat(cmd_clsnap, " -q ");
+	strcat(cmd_clsnap, quota);
+
+	//printf("\n%s\n", cmd_clsnap);
+	system(cmd_clsnap);
+}
+
+void runconfig(void)
+{
+	char subvol[PATH_MAX];
+	char pool[PATH_MAX];
+	char freq[8];
+	char quota[8];
+	char delim[] = " ";
+	char *ptr;
 
 	/* Because strok() is destructive, better operate with a copy */
 	char auxtab[configtab_c][PATH_MAX];
@@ -101,13 +132,7 @@ void execconfig(void)
 
 	for (int i = 0; i < configtab_c; i++)
 	{
-		char subvol[PATH_MAX];
-		char pool[PATH_MAX];
-		char freq[8];
-		char quota[8];
-
-		char delim[] = " ";
-		char *ptr = strtok(auxtab[i], delim);
+		ptr = strtok(auxtab[i], delim);
 
 		/* Get first field: subvolume */
 		if (ptr != NULL)
@@ -162,33 +187,19 @@ void execconfig(void)
 		}
 
 		/* Only execute once if freq is 0 */
-		if ((init != 0) && (atoi(freq) == 0))
-			continue;
+		if (atoi(freq) == 0)
+		{
+			if (initboot)  // We are on first execution cicle
+			{
+				commands(subvol, pool, freq, quota);
+			}
+		}
 		else
 		{
-			strcpy(cmd_mksnap, "mksnp -i ");
-			strcat(cmd_mksnap, subvol);
-			strcat(cmd_mksnap, " -o ");
-			strcat(cmd_mksnap, pool);
-			strcat(cmd_mksnap, " -f ");
-			strcat(cmd_mksnap, freq);
-
-			//printf("\n%s\n", cmd_mksnap);
-			system(cmd_mksnap);
-
-			sleep(1);  // A short breath. Maybe not necessary
-
-			strcpy(cmd_clsnap, "clsnp -p ");
-			strcat(cmd_clsnap, pool);
-			strcat(cmd_clsnap, " -q ");
-			strcat(cmd_clsnap, quota);
-
-			//printf("\n%s\n", cmd_clsnap);
-			system(cmd_clsnap);
+			commands(subvol, pool, freq, quota);
 		}
-
-		init = 1;  // Switch it to 1 for skip 0-numbered freqs
 	}
+	initboot = 0;  // Switch it to 1 for skip 0-numbered freqs
 }
 
 int writepid(void)
@@ -234,7 +245,7 @@ void handle_sigusr2(int sig)  // Write fifo and pull server to read clientfifo
 
 int main(void)
 {
-	if (loadconfig() > 0)
+	if (loadconfig() > 0)  // More than 0 lines loaded from config.
 	{
 		writepid();
 
@@ -247,7 +258,7 @@ int main(void)
 			signal(SIGUSR1, handle_sigusr1);  // Change verbosity
 			signal(SIGUSR2, handle_sigusr2);  // Show some statics?
 
-			execconfig();
+			runconfig();
 			sleep(sleepsecs);
 		}
 	}
