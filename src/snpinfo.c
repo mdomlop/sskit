@@ -118,7 +118,11 @@ int main(int argc, char **argv)
         if (check_is_subvol(subvol))
         {
             btrfs_util_subvolume_info(subvol, 0, &info);
-            printf("Generation: %ld, CTime: %ld\n", info.generation, info.ctime.tv_sec);
+
+
+            printf("Created: %ld\n"
+				   "Last changed: %ld\n",
+				   info.otime.tv_sec, info.ctime.tv_sec);
         }
         else
             return 1;
