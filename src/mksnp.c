@@ -577,8 +577,7 @@ int main(int argc, char **argv)
 			{
 				if (has_changed(lastsnap, ivalue, ovalue))
 				{
-					printf("%s: New snapshot: %s/%s\n",
-						   PROGRAM, ovalue, lastsnap);
+					printf("%s: New snapshot: %s\n", PROGRAM, snap_path);
 					make_snapshot(ivalue, snap_path);
 				}
 				else
