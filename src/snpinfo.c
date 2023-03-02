@@ -54,10 +54,12 @@ int check_is_subvol(char *subvol)
 
     if (!err)
         return 1;
-    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS || err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
-        printf("Is NOT a btrfs subvolume: %s\n", subvol);
-    else
-        printf("Is NOT a subvolume: %s\n", subvol);
+    else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS)
+        printf("Is not on a Btrfs filesystem: %s\n", subvol);
+    else if (err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
+        printf("Is not a subvolume: %s\n", subvol);
+	else
+		printf("Does not exist: %s\n", subvol);
 
     return 0;
 }
@@ -74,12 +76,9 @@ int main(int argc, char **argv)
 
 	int c;
 
-	while ((c = getopt (argc, argv, "s:hv")) != -1)
+	while ((c = getopt (argc, argv, "hv")) != -1)
 		switch (c)
 		{
-			case 's':  // Suvolume
-				subvol = optarg;
-				break;
 			case 'h':  // Show help
 				hflag = 1;
 				break;
@@ -98,7 +97,7 @@ int main(int argc, char **argv)
 				abort ();
 		}
 
-	if (argc - optind > 0)  // Max non-option argumets are 0
+	if (argc - optind > 1)  // Max non-option argumets are 1
 	{
 		fprintf (stderr, "Sorry. Too much arguments.\n");
 		return 1;
@@ -113,16 +112,30 @@ int main(int argc, char **argv)
 		version();
 	}
 
+
+	subvol = argv[optind];
+	/*for (int index = optind; index < argc; index++)
+		printf ("Non-option argument %s\n", argv[index]);*/
+
 	if (subvol)
     {
         if (check_is_subvol(subvol))
         {
             btrfs_util_subvolume_info(subvol, 0, &info);
 
+			struct tm *mytm;
+			char otime[64], ctime[64];
+			time_t myotime, myctime;
+			myotime = info.otime.tv_sec;
+			myctime = info.ctime.tv_sec;
 
-            printf("Created: %ld\n"
-				   "Last changed: %ld\n",
-				   info.otime.tv_sec, info.ctime.tv_sec);
+			mytm = localtime(&myotime);
+			strftime(otime, sizeof otime, "%Y-%m-%d %H:%M:%S", mytm);
+
+			mytm = localtime(&myctime);
+			strftime(ctime, sizeof ctime, "%Y-%m-%d %H:%M:%S", mytm);
+
+            printf("Created: %s\nLast changed: %s\n", otime, ctime);
         }
         else
             return 1;
