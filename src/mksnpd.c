@@ -215,31 +215,35 @@ int writepid(void)
 
 void handle_sigterm(int sig)
 {
-	printf("Recibida señal: %d (TERM)\n", sig);
+	printf("Received signal: %d (TERM)\n", sig);
 	quit(0);
 }
 
 void handle_sighup(int sig)  // FIXME: Stop the program execution
 {
-	printf("Recibida señal: %d (HUP)\n", sig);
-	puts("Reloading config...");
+	printf("Received signal: %d (HUP)\n", sig);
+	puts("Reloading config... Not implemented.");
 	loadconfig();
+	printconfig();
 	puts("Done!");
 }
 
 void handle_sigint(int sig)
 {
-	printf("Recibida señal: %d (INT)\n", sig);
+	printf("Received signal: %d (INT)\n", sig);
 	quit(0);
 }
 
 void handle_sigusr1(int sig)  // TODO: Change verbosity
 {
-	printf("Recibida señal: %d (USR1)\n", sig);
+	printf("Received signal: %d (USR1)\n", sig);
+	puts("Changing verbosity... Not implemented.");
 }
-void handle_sigusr2(int sig)  // Write fifo and pull server to read clientfifo
+void handle_sigusr2(int sig)  // Show statics
 {
-	printf("Recibida señal: %d (USR2)\n", sig);
+	printf("Received signal: %d (USR2)\n", sig);
+	puts("Show statics... Not implemented.");
+	printconfig();
 }
 
 
