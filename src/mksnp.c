@@ -367,7 +367,7 @@ int mkpool(char *pool_path)
 		}
 	}
 
-	printf("New pool created: %s\n", pool_path);
+	printf("New pool: %s\n", pool_path);
 	return 1;
 }
 
@@ -577,7 +577,7 @@ int main(int argc, char **argv)
 			{
 				if (has_changed(lastsnap, ivalue, ovalue))
 				{
-					printf("%s: New snapshot: %s\n", PROGRAM, snap_path);
+					printf("New snapshot: %s\n", snap_path);
 					make_snapshot(ivalue, snap_path);
 				}
 				else
