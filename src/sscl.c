@@ -8,12 +8,12 @@
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
 
-#define PROGRAM      "CleanSnap"
-#define EXECUTABLE   "clsnp"
+#define PROGRAM      "SnapClean"
+#define EXECUTABLE   "sscl"
 #define DESCRIPTION  "Clean snapshots in a Btrfs filesystem."
-#define PKGNAME      "makesnap"
+#define PKGNAME      "sstools"
 #define VERSION      "0.1a"
-#define URL          "https://github.com/mdomlop/makesnap"
+#define URL          "https://github.com/mdomlop/sstools"
 #define LICENSE      "GPLv3+"
 #define AUTHOR       "Manuel Domínguez López"
 #define NICK         "mdomlop"

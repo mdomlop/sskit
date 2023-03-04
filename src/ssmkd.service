@@ -1,0 +1,10 @@
+[Unit]
+Description=BtrFS snapshot daemon.
+
+[Service]
+Type=simple
+PIDFile=/tmp/ssmkd.pid
+ExecStart=/usr/bin/ssmkd
+
+[Install]
+WantedBy=multi-user.target

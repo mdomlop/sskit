@@ -11,12 +11,12 @@
 #include <dirent.h>
 #include <btrfsutil.h>
 
-#define PROGRAM	     "MakeSnap"
-#define EXECUTABLE   "mksnp"
+#define PROGRAM	     "SnapMake"
+#define EXECUTABLE   "ssmk"
 #define DESCRIPTION  "Make snapshots in a Btrfs filesystem."
-#define PKGNAME      "makesnap"
+#define PKGNAME      "sstools"
 #define VERSION      "0.1a"
-#define URL          "https://github.com/mdomlop/makesnap"
+#define URL          "https://github.com/mdomlop/sstools"
 #define LICENSE      "GPLv3+"
 #define AUTHOR       "Manuel Domínguez López"
 #define NICK         "mdomlop"

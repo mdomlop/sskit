@@ -1,5 +1,5 @@
-SOURCES = src/mksnp.c src/mksnpd.c src/clsnp.c src/snpinfo.c src/snpls.c
-SERVICES = src/mksnpd.service
+SOURCES = src/ssmkd.c src/ssmk.c src/sscl.c src/ssct.c src/ssls.c
+SERVICES = src/ssmkd.service
 CONFS = src/sstab
 
 NAME = $(shell grep -m1 PROGRAM $(firstword $(SOURCES)) | cut -d\" -f2)

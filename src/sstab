@@ -1,5 +1,5 @@
 # /etc/sstab
-# Snapshots table is part of mksnp tools, but can be used for others.
+# Snapshots table is part of sstools, but can be used for others.
 # Only lines wich starts with '/' character will be procesed.
 
 # First field is the source btrfs subvolume, the second one is the pool,
@@ -19,14 +19,14 @@
 #############################################################################
 
 # On boot
-/                        /backup/mksnp/system/boot       0            30
-#/home                   /backup/mksnp/home/boot         0            30
+/                        /backup/ss/system/boot       0            30
+#/home                   /backup/ss/home/boot         0            30
 
 # Daily
-/                        /backup/mksnp/system/daily      1d           30
+/                        /backup/ss/system/daily      1d           30
 
 # Hourly
-#/home                   /backup/mksnp/home/hourly       1h           30
+#/home                   /backup/ss/home/hourly       1h           30
 
 # 30m
-#/home/mdl/Documentos    /backup/mksnp/mydocs/30m        30m          50
+#/home/mdl/Documentos     /backup/ss/mydocs/30m        30m          50

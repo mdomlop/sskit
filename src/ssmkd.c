@@ -6,19 +6,19 @@
 #include <signal.h>
 
 
-#define PROGRAM      "MakeSnapD"
-#define EXECUTABLE   "mksnpd"
+#define PROGRAM      "SnaphotDaemon"
+#define EXECUTABLE   "ssmkd"
 #define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
-#define PKGNAME      "makesnap"
+#define PKGNAME      "sstools"
 #define VERSION      "0.1a"
-#define URL          "https://github.com/mdomlop/makesnap"
+#define URL          "https://github.com/mdomlop/sstools"
 #define LICENSE      "GPLv3+"
 #define AUTHOR       "Manuel Domínguez López"
 #define NICK         "mdomlop"
 #define MAIL         "zqbzybc@tznvy.pbz"
 
 #define CONFIGFILE "/etc/sstab"
-#define PIDFILE "/tmp/mksnpd.pid"
+#define PIDFILE "/tmp/ssmkd.pid"
 
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000
@@ -92,28 +92,28 @@ void printconfig(void)
 
 void commands(char *subv, char *pool, char *freq, char *quota)
 {
-	char cmd_mksnap[PATH_MAX];
-	char cmd_clsnap[PATH_MAX];
+	char cmd_mk[PATH_MAX];
+	char cmd_cl[PATH_MAX];
 
-	strcpy(cmd_mksnap, "mksnp -i ");
-	strcat(cmd_mksnap, subv);
-	strcat(cmd_mksnap, " -o ");
-	strcat(cmd_mksnap, pool);
-	strcat(cmd_mksnap, " -f ");
-	strcat(cmd_mksnap, freq);
+	strcpy(cmd_mk, "ssmk -i ");
+	strcat(cmd_mk, subv);
+	strcat(cmd_mk, " -o ");
+	strcat(cmd_mk, pool);
+	strcat(cmd_mk, " -f ");
+	strcat(cmd_mk, freq);
 
-	//printf("\n%s\n", cmd_mksnap);
-	system(cmd_mksnap);
+	//printf("\n%s\n", cmd_mk);
+	system(cmd_mk);
 
 	sleep(1);  // A short breath. Maybe not necessary
 
-	strcpy(cmd_clsnap, "clsnp -p ");
-	strcat(cmd_clsnap, pool);
-	strcat(cmd_clsnap, " -q ");
-	strcat(cmd_clsnap, quota);
+	strcpy(cmd_cl, "sscl -p ");
+	strcat(cmd_cl, pool);
+	strcat(cmd_cl, " -q ");
+	strcat(cmd_cl, quota);
 
-	//printf("\n%s\n", cmd_clsnap);
-	system(cmd_clsnap);
+	//printf("\n%s\n", cmd_cl);
+	system(cmd_cl);
 }
 
 void runconfig(void)
