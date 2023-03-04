@@ -12,7 +12,7 @@
 #define EXECUTABLE   "sscl"
 #define DESCRIPTION  "Clean snapshots in a Btrfs filesystem."
 #define PKGNAME      "sstools"
-#define VERSION      "0.2a"
+#define VERSION      "0.2b"
 #define URL          "https://github.com/mdomlop/sstools"
 #define LICENSE      "GPLv3+"
 #define AUTHOR       "Manuel Domínguez López"
