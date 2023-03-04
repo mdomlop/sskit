@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 				if (check_is_subvol(snap_path))
 				{
 					btrfs_util_delete_subvolume(snap_path, 0);
-					printf("%s: Snapshot deleted: %s\n", PROGRAM, snap_path);
+					printf("Deleted snapshot: %s\n", snap_path);
 				}
 			}
 		}
