@@ -1,6 +1,8 @@
-SOURCES = src/ssmkd.c src/ssmk.c src/sscl.c src/ssct.c src/ssls.c
-SERVICES = src/ssmkd.service
+SOURCES = src/sstd.c src/ssmk.c src/sscl.c src/ssct.c #src/ssls.c
+SERVICES = src/sstd.service
 CONFS = src/sstab
+MANDOC1 = man/sstools.1.md
+MANDOC5 = man/sstab.5.md
 
 NAME = $(shell grep -m1 PROGRAM $(firstword $(SOURCES)) | cut -d\" -f2)
 EXECUTABLE = $(shell grep -m1 EXECUTABLE $(firstword $(SOURCES)) | cut -d\" -f2)
@@ -18,22 +20,32 @@ DESTDIR = ''
 CFLAGS = -lbtrfsutil -std=c11 -Os -Wall -Wextra -pedantic
 
 BINARIES = $(notdir $(basename $(SOURCES)))
+
+MAN1 = $(basename $(MANDOC1))
+MAN5 = $(basename $(MANDOC5))
+ZMAN1 = $(addsuffix .gz, $(MAN1))
+ZMAN5 = $(addsuffix .gz, $(MAN5))
+ZMAN = $(ZMAN1) $(ZMAN5)
+
 INSTALLED_BINARIES = $(addprefix $(DESTDIR)$(PREFIX)/bin/,$(BINARIES))
 INSTALLED_SERVICES = $(addprefix $(DESTDIR)$(PREFIX)/lib/systemd/system/,$(notdir $(SERVICES)))
 INSTALLED_CONFS = $(addprefix $(DESTDIR)/etc/,$(notdir $(CONFS)))
+INSTALLED_MAN1 = $(addprefix $(DESTDIR)$(PREFIX)/share/man/man1/, $(notdir $(ZMAN1)))
+INSTALLED_MAN5 = $(addprefix $(DESTDIR)$(PREFIX)/share/man/man5/, $(notdir $(ZMAN5)))
+INSTALLED_MANS = $(INSTALLED_MAN1) $(INSTALLED_MAN5)
 
 ELFS = $(addsuffix .elf,$(addprefix src/,$(BINARIES)))
 
 PKGEXT=.pkg.tar.zst
 ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
 
-all: elf
+all: elf zman
 
 install: install_elf LICENSE README.md
 	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(PKGNAME)/COPYING
 	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(PKGNAME)/README
 
-arch_install: install systemd_arch_install_services systemd_install_confs
+arch_install: install systemd_arch_install_services install_confs install_manuals
 
 %.elf: %.c
 	$(CC) $^ -o $@ $(CFLAGS)
@@ -57,9 +69,17 @@ $(DESTDIR)$(PREFIX)/lib/systemd/system/%.service: src/%.service
 	install -dm 755 $(DESTDIR)$(PREFIX)/lib/systemd/system/
 	install -Dm 644 $^ $@
 
-systemd_install_confs: $(INSTALLED_CONFS)
+install_confs: $(INSTALLED_CONFS)
 $(DESTDIR)/etc/sstab: src/sstab
 	install -dm 755 $(DESTDIR)/etc/
+	install -Dm 644 $^ $@
+
+install_manuals: $(INSTALLED_MANS)
+$(DESTDIR)$(PREFIX)/share/man/man1/%.1.gz: man/%.1.gz
+	install -dm 755 $(DESTDIR)$(PREFIX)/share/man/man1/
+	install -Dm 644 $^ $@
+$(DESTDIR)$(PREFIX)/share/man/man5/%.5.gz: man/%.5.gz
+	install -dm 755 $(DESTDIR)$(PREFIX)/share/man/man5/
 	install -Dm 644 $^ $@
 
 uninstall:
@@ -79,6 +99,10 @@ arch_clean:
 
 clean: arch_clean
 	rm -rf $(ELFS)
+	rm -rf $(ZMAN)
+
+purge: clean
+	rm -f $(MAN1)
 
 arch_pkg: $(ARCHPKG)
 $(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(SERVICES) $(CONFS)
@@ -111,5 +135,24 @@ PKGBUILD:
 	echo 'cd $$startdir' >> $@
 	echo 'make arch_install DESTDIR=$$pkgdir' >> $@
 	echo '}' >> $@
+
+man: man1 man5
+zman: zman1 zman5
+
+man1: $(MAN1)
+man/%.1: man/%.1.md
+	pandoc $^ -s -t man -o $@
+
+man5: $(MAN5)
+man/%.5: man/%.5.md
+	pandoc $^ -s -t man -o $@
+
+zman1: $(ZMAN1)
+man/%.1.gz: man/%.1
+	gzip -k $^
+
+zman5: $(ZMAN5)
+man/%.5.gz: man/%.5
+	gzip -k $^
 
 .PHONY: clean arch_clean uninstall

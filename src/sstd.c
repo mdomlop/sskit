@@ -7,7 +7,7 @@
 
 
 #define PROGRAM      "SnaphotDaemon"
-#define EXECUTABLE   "ssmkd"
+#define EXECUTABLE   "sstd"
 #define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
 #define PKGNAME      "sstools"
 #define VERSION      "0.2b"
@@ -18,7 +18,7 @@
 #define MAIL         "zqbzybc@tznvy.pbz"
 
 #define CONFIGFILE "/etc/sstab"
-#define PIDFILE "/tmp/ssmkd.pid"
+#define PIDFILE "/tmp/sstd.pid"
 
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000
