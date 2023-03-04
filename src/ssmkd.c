@@ -256,11 +256,11 @@ int main(void)
 		/* Daemonizing */
 		for (;;)
 		{
-			signal(SIGTERM, handle_sigterm);
+			/*signal(SIGTERM, handle_sigterm);
 			signal(SIGHUP, handle_sighup);  // reload config: loadconfig()
 			signal(SIGINT, handle_sigint);
 			signal(SIGUSR1, handle_sigusr1);  // Change verbosity
-			signal(SIGUSR2, handle_sigusr2);  // Show some statics?
+			signal(SIGUSR2, handle_sigusr2);  // Show some statics?*/
 
 			runconfig();
 			sleep(sleepsecs);
