@@ -1,3 +1,7 @@
+#################
+#### SSTools ####
+#################
+
 SOURCES = src/sstd.c src/ssmk.c src/sscl.c src/ssct.c #src/ssls.c
 HEADERS = src/sstools.h
 SERVICES = src/sstd.service
@@ -42,11 +46,11 @@ ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
 
 all: elf zman
 
-install: install_elf LICENSE README.md
+install: install_elf LICENSE README.md install_confs install_manuals systemd_arch_install_services
 	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(PKGNAME)/COPYING
 	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(PKGNAME)/README
 
-arch_install: install systemd_arch_install_services install_confs install_manuals
+arch_install: install
 
 %.elf: %.c $(HEADERS)
 	$(CC) $< -o $@ $(CFLAGS)
@@ -98,7 +102,7 @@ arch_clean:
 	rm -f PKGBUILD
 	rm -f $(PKGNAME)-*$(PKGEXT)
 
-clean: arch_clean
+clean: arch_clean clean_debian
 	rm -f $(ELFS)
 	rm -f $(ZMAN)
 
@@ -155,5 +159,7 @@ man/%.1.gz: man/%.1
 zman5: $(ZMAN5)
 man/%.5.gz: man/%.5
 	gzip -kf $^
+
+include debian.mk
 
 .PHONY: clean arch_clean uninstall
