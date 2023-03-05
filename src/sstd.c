@@ -5,17 +5,11 @@
 #include <unistd.h>  /* for getpid() */
 #include <signal.h>
 
-
 #define PROGRAM      "SnaphotDaemon"
 #define EXECUTABLE   "sstd"
 #define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
-#define PKGNAME      "sstools"
-#define VERSION      "0.3b"
-#define URL          "https://github.com/mdomlop/sstools"
-#define LICENSE      "GPLv3+"
-#define AUTHOR       "Manuel Domínguez López"
-#define NICK         "mdomlop"
-#define MAIL         "zqbzybc@tznvy.pbz"
+
+#include "sstools.h"
 
 #define CONFIGFILE "/etc/sstab"
 #define PIDFILE "/tmp/sstd.pid"

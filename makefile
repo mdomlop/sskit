@@ -1,18 +1,19 @@
 SOURCES = src/sstd.c src/ssmk.c src/sscl.c src/ssct.c #src/ssls.c
+HEADERS = src/sstools.h
 SERVICES = src/sstd.service
 CONFS = src/sstab
 MANDOC1 = man/sstools.1.md
 MANDOC5 = man/sstab.5.md
 
-NAME = $(shell grep -m1 PROGRAM $(firstword $(SOURCES)) | cut -d\" -f2)
-EXECUTABLE = $(shell grep -m1 EXECUTABLE $(firstword $(SOURCES)) | cut -d\" -f2)
-PKGNAME = $(shell grep -m1 PKGNAME $(firstword $(SOURCES)) | cut -d\" -f2)
-DESCRIPTION = $(shell grep -m1 DESCRIPTION $(firstword $(SOURCES)) | cut -d\" -f2)
-VERSION = $(shell grep -m1 VERSION $(firstword $(SOURCES)) | cut -d\" -f2)
-AUTHOR = $(shell grep -m1 AUTHOR $(firstword $(SOURCES)) | cut -d\" -f2)
-MAIL := $(shell grep -m1 MAIL $(firstword $(SOURCES)) | cut -d\" -f2 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]')
-URL = $(shell grep -m1 URL $(firstword $(SOURCES)) | cut -d\" -f2)
-LICENSE = $(shell grep -m1 LICENSE $(firstword $(SOURCES)) | cut -d\" -f2)
+NAME = $(shell grep -m1 PROGRAM $(firstword $(HEADERS)) | cut -d\" -f2)
+EXECUTABLE = $(shell grep -m1 EXECUTABLE $(firstword $(HEADERS)) | cut -d\" -f2)
+PKGNAME = $(shell grep -m1 PKGNAME $(firstword $(HEADERS)) | cut -d\" -f2)
+DESCRIPTION = $(shell grep -m1 DESCRIPTION $(firstword $(HEADERS)) | cut -d\" -f2)
+VERSION = $(shell grep -m1 VERSION $(firstword $(HEADERS)) | cut -d\" -f2)
+AUTHOR = $(shell grep -m1 AUTHOR $(firstword $(HEADERS)) | cut -d\" -f2)
+MAIL := $(shell grep -m1 MAIL $(firstword $(HEADERS)) | cut -d\" -f2 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]')
+URL = $(shell grep -m1 URL $(firstword $(HEADERS)) | cut -d\" -f2)
+LICENSE = $(shell grep -m1 LICENSE $(firstword $(HEADERS)) | cut -d\" -f2)
 
 PREFIX = '/usr'
 DESTDIR = ''
@@ -47,8 +48,8 @@ install: install_elf LICENSE README.md
 
 arch_install: install systemd_arch_install_services install_confs install_manuals
 
-%.elf: %.c
-	$(CC) $^ -o $@ $(CFLAGS)
+%.elf: %.c $(HEADERS)
+	$(CC) $< -o $@ $(CFLAGS)
 
 elf: $(ELFS)
 
@@ -98,11 +99,11 @@ arch_clean:
 	rm -f $(PKGNAME)-*$(PKGEXT)
 
 clean: arch_clean
-	rm -rf $(ELFS)
-	rm -rf $(ZMAN)
+	rm -f $(ELFS)
+	rm -f $(ZMAN)
 
 purge: clean
-	rm -f $(MAN1)
+	rm -rf $(MAN1)
 
 arch_pkg: $(ARCHPKG)
 $(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(SERVICES) $(CONFS)

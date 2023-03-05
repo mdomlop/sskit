@@ -14,13 +14,8 @@
 #define PROGRAM	     "SnapMake"
 #define EXECUTABLE   "ssmk"
 #define DESCRIPTION  "Make snapshots in a Btrfs filesystem."
-#define PKGNAME      "sstools"
-#define VERSION      "0.3b"
-#define URL          "https://github.com/mdomlop/sstools"
-#define LICENSE      "GPLv3+"
-#define AUTHOR       "Manuel Domínguez López"
-#define NICK         "mdomlop"
-#define MAIL         "zqbzybc@tznvy.pbz"
+
+#include "sstools.h"
 
 #define PATH_MAX_STRING_SIZE 256
 
@@ -39,11 +34,6 @@ char snaplist[SNAPLISTSIZE][PATH_MAX];  // List of snapshots in pool_path
 int snapls_c = 0;  // Number of elements in snaplist
 
 size_t strnlen(const char s[], size_t maxlen);
-
-void version (void)
-{
-	printf ("%s Version: %s\n", PROGRAM, VERSION);
-}
 
 
 void help (int error)

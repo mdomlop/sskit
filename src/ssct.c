@@ -11,21 +11,10 @@
 #define PROGRAM      "SnapCT"
 #define EXECUTABLE   "ssct"
 #define DESCRIPTION  "Show creation time and last change date from snapshots in a Btrfs filesystem."
-#define PKGNAME      "sstools"
-#define VERSION      "0.3b"
-#define URL          "https://github.com/mdomlop/sstools"
-#define LICENSE      "GPLv3+"
-#define AUTHOR       "Manuel Domínguez López"
-#define NICK         "mdomlop"
-#define MAIL         "zqbzybc@tznvy.pbz"
+
+#include "sstools.h"
 
 #define TIMESTAMP    "%F %T"
-
-void version (void)
-{
-	printf ("%s Version: %s\n", PROGRAM, VERSION);
-}
-
 
 void help (int error)
 {
