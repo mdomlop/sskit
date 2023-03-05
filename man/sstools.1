@@ -47,19 +47,17 @@ Additionally, it also integrates the following tools:
 \f[I]ssct\f[R]: Shows creation and changed time a snapshot.
 .SS Not implemented yet tools
 .IP \[bu] 2
-_ssst: Shows some statics of interest.
+\f[I]ssst\f[R]: Shows some statics of interest.
 .IP \[bu] 2
 \f[I]ssgui\f[R]: Graphic user interface.
 .SS Basic operation
 .PP
-On startup \f[B]sstd\f[R] loads \f[V]/etc/sstab\f[R] (see sstab(5)) into
-memory and periodically creates or deletes snapshots in the specified
-\f[I]pool\f[R] directory.
-.PP
-For this task a systemd service file is provided.
-.PP
 Edit \f[V]/etc/sstab\f[R] at your preferences and then start and enable
-\f[V]sstd.service\f[R].
+the systemd provided service \f[V]sstd.service\f[R].
+.PP
+On startup \f[B]sstd\f[R] will load \f[V]/etc/sstab\f[R] (see sstab(5))
+into memory and periodically creates or deletes snapshots in the
+specified \f[I]pool\f[R] directory.
 .SS \f[V]/etc/sstab\f[R]
 .PP
 A simple table, named \f[V]/etc/sstab\f[R] is provided as configuration
