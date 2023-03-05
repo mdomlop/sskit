@@ -62,10 +62,7 @@ int check_root(void)
 	int uid = getuid();
 	int euid = geteuid();
 	if (uid != 0 || uid != euid)
-	{
-		fprintf(stderr, "You must to be root for do this.\n");
 		return 1;
-	}
 	return 0;
 }
 
@@ -516,6 +513,12 @@ int main(int argc, char **argv)
 	else if (vflag)
 	{
 		version();
+	}
+
+	if (check_root())
+	{
+		fprintf(stderr, "You must to be root for do this.\n");
+		return 1;
 	}
 
 	if (ivalue && ovalue && fvalue)

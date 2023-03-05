@@ -8,6 +8,7 @@
 #include <getopt.h>
 #include <stdlib.h>  // atoi() abort()
 #include <ctype.h>  /* isdigit() isprint() */
+#include <unistd.h> /* uid, euid */
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
@@ -41,7 +42,6 @@ void help (int error)
 		printf ("%s\n%s\n", DESCRIPTION, text);
 	}
 }
-
 
 int get_snapshots(char *pool_path)
 {
@@ -110,8 +110,18 @@ int check_is_subvol(char *subvol)
     return 0;
 }
 
+int check_root(void)
+{
+	int uid = getuid();
+	int euid = geteuid();
+	if (uid != 0 || uid != euid)
+		return 1;
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
+
 	int hflag, vflag;
 	hflag = vflag = 0;
 
@@ -166,6 +176,12 @@ int main(int argc, char **argv)
 	else if (vflag)
 	{
 		version();
+	}
+
+	if (check_root())
+	{
+		fprintf(stderr, "You must to be root for do this.\n");
+		return 1;
 	}
 
 	if (pvalue && qvalue)
