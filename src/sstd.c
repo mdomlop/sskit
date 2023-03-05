@@ -257,8 +257,8 @@ void handle_sighup(int sig)  // FIXME: Stop the program execution
 {
 	printf("Received signal: %d (HUP)\n", sig);
 	puts("Reloading config... Not implemented.");
-	loadconfig();
-	printconfig();
+	/*loadconfig();
+	printconfig();*/
 	puts("Done!");
 }
 
@@ -345,16 +345,16 @@ int main(int argc, char **argv)
 
 	if (loadconfig() > 0)  // More than 0 lines loaded from config.
 	{
-		writepid();
+		writepid();  // Check if another daemon is running. If then, kill it.
 
 		/* Daemonizing */
 		for (;;)
 		{
-			/*signal(SIGTERM, handle_sigterm);
+			signal(SIGTERM, handle_sigterm);
 			signal(SIGHUP, handle_sighup);  // reload config: loadconfig()
 			signal(SIGINT, handle_sigint);
 			signal(SIGUSR1, handle_sigusr1);  // Change verbosity
-			signal(SIGUSR2, handle_sigusr2);  // Show some statics?*/
+			signal(SIGUSR2, handle_sigusr2);  // Show some statics?
 
 			runconfig();
 			sleep(sleepsecs);
