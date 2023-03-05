@@ -1,10 +1,11 @@
 # Packaging
-pkg
+pkg/
 *.pkg.tar.*
 *.deb
 *.rpm
 PKGBUILD
 *.gz
+sstools-0.4b_amd64/
 
 # Swap files
 *.kate-swp

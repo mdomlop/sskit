@@ -3,6 +3,8 @@ DARCHI = $(shell dpkg --print-architecture)
 DEBIANDIR = $(PKGNAME)-$(VERSION)_$(DARCHI)
 DEBIANPKG = $(DEBIANDIR).deb
 
+DEBIANDEPS = libbtrfsutil1
+
 $(DEBIANDIR)/DEBIAN:
 	mkdir -p -m 0775 $@
 
@@ -23,7 +25,7 @@ $(DEBIANDIR)/DEBIAN/control: $(DEBIANDIR)/DEBIAN
 	echo 'Package: $(PKGNAME)' > $@
 	echo 'Version: $(VERSION)' >> $@
 	echo 'Architecture: all' >> $@
-	echo 'Depends:' >> $@
+	echo 'Depends: libbtrfsutil1' >> $@
 	echo 'Description: $(DESCRIPTION)' >> $@
 	echo 'Section: main' >> $@
 	echo 'Priority: optional' >> $@
