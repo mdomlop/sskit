@@ -4,6 +4,7 @@ pkg
 *.deb
 *.rpm
 PKGBUILD
+*.gz
 
 # Swap files
 *.kate-swp
