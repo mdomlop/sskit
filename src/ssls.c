@@ -1,3 +1,7 @@
+#define PROGRAM      "SnapList"
+#define EXECUTABLE   "ssls"
+#define DESCRIPTION  "List snapshots of a subvolume in a Btrfs filesystem."
+
 #include <stdio.h>
 #include <time.h>
 #include <btrfsutil.h>
@@ -7,11 +11,6 @@
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
-
-#define PROGRAM      "SnapList"
-#define EXECUTABLE   "ssls"
-#define DESCRIPTION  "List snapshots of a subvolume in a Btrfs filesystem."
-
 #include "sstools.h"
 
 

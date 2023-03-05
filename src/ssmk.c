@@ -1,3 +1,7 @@
+#define PROGRAM	     "SnapMake"
+#define EXECUTABLE   "ssmk"
+#define DESCRIPTION  "Make snapshots in a Btrfs filesystem."
+
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h> /* gentenv(), abort() */
@@ -10,11 +14,6 @@
 #include <ctype.h>  /* isdigit() */
 #include <dirent.h>
 #include <btrfsutil.h>
-
-#define PROGRAM	     "SnapMake"
-#define EXECUTABLE   "ssmk"
-#define DESCRIPTION  "Make snapshots in a Btrfs filesystem."
-
 #include "sstools.h"
 
 #define PATH_MAX_STRING_SIZE 256

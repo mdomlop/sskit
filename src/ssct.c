@@ -1,3 +1,7 @@
+#define PROGRAM      "SnapCT"
+#define EXECUTABLE   "ssct"
+#define DESCRIPTION  "Show creation time and last change date from snapshots in a Btrfs filesystem."
+
 #include <stdio.h>
 #include <time.h>
 #include <btrfsutil.h>
@@ -7,12 +11,8 @@
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
-
-#define PROGRAM      "SnapCT"
-#define EXECUTABLE   "ssct"
-#define DESCRIPTION  "Show creation time and last change date from snapshots in a Btrfs filesystem."
-
 #include "sstools.h"
+
 
 #define TIMESTAMP    "%F %T"
 

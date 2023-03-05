@@ -1,3 +1,7 @@
+#define PROGRAM      "SnapClean"
+#define EXECUTABLE   "sscl"
+#define DESCRIPTION  "Clean snapshots in a Btrfs filesystem."
+
 #include <stdio.h>
 #include <time.h>
 #include <btrfsutil.h>
@@ -7,11 +11,6 @@
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
-
-#define PROGRAM      "SnapClean"
-#define EXECUTABLE   "sscl"
-#define DESCRIPTION  "Clean snapshots in a Btrfs filesystem."
-
 #include "sstools.h"
 
 /* Btrfs has not this limit, but I think this value is very safe. */

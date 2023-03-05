@@ -1,14 +1,13 @@
+#define PROGRAM      "SnaphotDaemon"
+#define EXECUTABLE   "sstd"
+#define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
+
 #include <stdio.h>
 #include <stdlib.h> /* exit() */
 #include <string.h> /* strlen() */
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <unistd.h>  /* for getpid() */
 #include <signal.h>
-
-#define PROGRAM      "SnaphotDaemon"
-#define EXECUTABLE   "sstd"
-#define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
-
 #include "sstools.h"
 
 #define CONFIGFILE "/etc/sstab"
