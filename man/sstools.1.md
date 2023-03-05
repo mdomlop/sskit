@@ -84,7 +84,18 @@ fit to the quota.
 Is the daemon. Loads `/etc/sstab` into memory and starts an infinite
 loop where firstly runs `ssmk` and then `sscl` for each line of such file.
 
-The loop repeats itself every 5 seconds.
+By default the loop repeats itself every 5 seconds, but it can be changed
+setting a _period_ in command line.
+
+    Usage:
+            sstd [-h] [-v] [period]
+
+    Options:
+            period       Time in seconds for loop repeat. Defaults to 5.
+
+            -h           Show this help and exit.
+            -v           Show program version and exit.
+
 
 ## ssmk
 
@@ -97,16 +108,45 @@ are differences with source subvolume, and then takes a new snapshot.
 The snapshot name is automatically set in the `date` format
 **`+%Y-%m-%d_%H-%M-%S`**.
 
+    Usage:
+            ssmk [-h] [-v] -p dir -q quota -f freq
+
+    Options:
+            -i subv      Set the subvolume.
+            -o dir       Set the output directory.
+            -f freq      Set the frequency.
+
+            -h           Show this help and exit.
+            -v           Show program version and exit.
 
 ## sscl
 
 Takes a pool directory and checks if there are more snapshots than
 indicated as maximum by the quota. If then, deletes the oldest snapshots until the quota is met.
 
+    Usage:
+            sscl [-h] [-v] -p dir -q quota
+
+    Options:
+            -p dir       Set the output directory.
+            -q quota     Set the quota.
+
+            -h           Show this help and exit.
+            -v           Show program version and exit.
+
 ## ssct
 
 Shows when subvolume was created and when an inode in the subvolume
 was last change.
+
+    Usage:
+            ssct [-h] [-v] path
+
+    Options:
+            path         Path to subvolume.
+
+            -h           Show this help and exit.
+            -v           Show program version and exit.
 
 # NOT YET IMPLEMENTED/INCLUDED TOOLS
 

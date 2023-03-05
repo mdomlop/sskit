@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 #include <stdlib.h> /* exit() */
+#include <ctype.h>  /* isdigit() isprint() */
+#include <getopt.h>
 #include <string.h> /* strlen() */
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <unistd.h>  /* for getpid() */
@@ -15,14 +17,53 @@
 
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000
+#define DEFSLEEPTIME 5
+#define DEFSLEEPTIME_S "5"
 
 int initboot = 1;  // For executing only once (on application start).
-int sleepsecs = 5;  // Sleep time for daemon.
+int sleepsecs = DEFSLEEPTIME;  // Sleep time for daemon.
 
 /* List of entries for automatic snapshotting */
 char configtab[SNAPLISTSIZE][PATH_MAX];
 int configtab_c = 0;  // Number of elements in configtab
 
+
+void help (int error)
+{
+	char text[] = "\nUsage:\n\t"
+	EXECUTABLE
+	" [-h] [-v] [period]\n"
+	"\nOptions:\n"
+	"\tperiod       Time in seconds for loop repeat. Defaults to "
+	DEFSLEEPTIME_S
+	".\n\n"
+	"\t-h           Show this help and exit.\n"
+	"\t-v           Show program version and exit.\n";
+
+	if (error)
+		fprintf (stderr, "%s\n", text);
+	else
+	{
+		version();
+		printf ("%s\n%s\n", DESCRIPTION, text);
+	}
+}
+
+int is_integer (char * s)
+/* Determines if passed string is a positive integer */
+{
+    short c;
+    short sc = strlen(s);
+
+    for ( c = 0; c < sc; c++ )
+    {
+        if (isdigit (s[c]))
+            continue;
+        else
+			return 0;
+    }
+    return 1;
+}
 
 void quit(int n)
 {
@@ -240,8 +281,68 @@ void handle_sigusr2(int sig)  // Show statics
 }
 
 
-int main(void)
+int main(int argc, char **argv)
 {
+	int hflag, vflag;
+	hflag = vflag = 0;
+
+	char *period = NULL;  // How many time to sleep
+
+	int c;
+
+	while ((c = getopt (argc, argv, "hv")) != -1)
+		switch (c)
+		{
+			case 'h':  // Show help
+				hflag = 1;
+				break;
+			case 'v':  // Show program version
+				vflag = 1;
+				break;
+			case '?':
+				if (isprint (optopt))
+					fprintf (stderr, "Unknown option `-%c'.\n"
+					"See help.\n", optopt);
+				else
+					fprintf (stderr, "Unknown option character `\\x%x'.\n",
+							optopt);
+				return 1;
+			default:
+				abort ();
+		}
+
+	if (argc - optind > 1)  // Max non-option argumets are 1
+	{
+		fprintf (stderr, "Sorry. Too much arguments.\n");
+		return 1;
+	}
+
+	if(hflag)
+	{
+		help(0);
+		return 0;
+	}
+	else if (vflag)
+	{
+		version();
+		return 0;
+	}
+
+	period = argv[optind];
+	/*for (int index = optind; index < argc; index++)
+		printf ("Non-option argument %s\n", argv[index]);*/
+
+	if (period)
+    {
+        if (is_integer(period))
+			sleepsecs = atoi(period);
+		else
+		{
+			fprintf(stderr, "Wrong period for daemon loop: %s\n", period);
+			return 1;
+		}
+	}
+
 	if (loadconfig() > 0)  // More than 0 lines loaded from config.
 	{
 		writepid();

@@ -22,6 +22,7 @@ void help (int error)
 	EXECUTABLE
 	" [-h] [-v] path\n"
 	"\nOptions:\n"
+	"\tpath         Path to subvolume.\n\n"
 	"\t-h           Show this help and exit.\n"
 	"\t-v           Show program version and exit.\n";
 

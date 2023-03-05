@@ -91,7 +91,21 @@ Loads \f[V]/etc/sstab\f[R] into memory and starts an infinite loop where
 firstly runs \f[V]ssmk\f[R] and then \f[V]sscl\f[R] for each line of
 such file.
 .PP
-The loop repeats itself every 5 seconds.
+By default the loop repeats itself every 5 seconds, but it can be
+changed setting a \f[I]period\f[R] in command line.
+.IP
+.nf
+\f[C]
+Usage:
+        sstd [-h] [-v] [period]
+
+Options:
+        period       Time in seconds for loop repeat. Defaults to 5.
+
+        -h           Show this help and exit.
+        -v           Show program version and exit.
+\f[R]
+.fi
 .SS ssmk
 .PP
 Takes a source soubvolume and creates a snapshot and a destination
@@ -102,15 +116,57 @@ differences with source subvolume, and then takes a new snapshot.
 .PP
 The snapshot name is automatically set in the \f[V]date\f[R] format
 \f[B]\f[VB]+%Y-%m-%d_%H-%M-%S\f[B]\f[R].
+.IP
+.nf
+\f[C]
+Usage:
+        ssmk [-h] [-v] -p dir -q quota -f freq
+
+Options:
+        -i subv      Set the subvolume.
+        -o dir       Set the output directory.
+        -f freq      Set the frequency.
+
+        -h           Show this help and exit.
+        -v           Show program version and exit.
+\f[R]
+.fi
 .SS sscl
 .PP
 Takes a pool directory and checks if there are more snapshots than
 indicated as maximum by the quota.
 If then, deletes the oldest snapshots until the quota is met.
+.IP
+.nf
+\f[C]
+Usage:
+        sscl [-h] [-v] -p dir -q quota
+
+Options:
+        -p dir       Set the output directory.
+        -q quota     Set the quota.
+
+        -h           Show this help and exit.
+        -v           Show program version and exit.
+\f[R]
+.fi
 .SS ssct
 .PP
 Shows when subvolume was created and when an inode in the subvolume was
 last change.
+.IP
+.nf
+\f[C]
+Usage:
+        ssct [-h] [-v] path
+
+Options:
+        path         Path to subvolume.
+
+        -h           Show this help and exit.
+        -v           Show program version and exit.
+\f[R]
+.fi
 .SH NOT YET IMPLEMENTED/INCLUDED TOOLS
 .SS ssst
 .PP

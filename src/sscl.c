@@ -23,9 +23,11 @@ int diff = 0;
 
 void help (int error)
 {
-	char text[] = "\nUsage:\n\n"
-
-	"\t-p dir       Set the output directory.\n\n"
+	char text[] = "\nUsage:\n\t"
+	EXECUTABLE
+	" [-h] [-v] -p dir -q quota\n"
+	"\nOptions:\n"
+	"\t-p dir       Set the output directory.\n"
 	"\t-q quota     Set the quota.\n\n"
 
 	"\t-h           Show this help and exit.\n"
