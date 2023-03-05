@@ -28,7 +28,7 @@ int diff = 0;
 
 void version (void)
 {
-	printf ("%s Version: %s\n", PROGRAM, VERSION);
+	printf ("%s Version: %s\n\n%s\n", PROGRAM, VERSION, DESCRIPTION);
 }
 
 
@@ -36,11 +36,11 @@ void help (int error)
 {
 	char text[] = "\nUsage:\n\n"
 
-	"\t-p dir			Set the output directory.\n\n"
-	"\t-q quota			Set the quota.\n\n"
+	"\t-p dir       Set the output directory.\n\n"
+	"\t-q quota     Set the quota.\n\n"
 
-	"\t-h				Show this help and exit.\n"
-	"\t-v				Show program version and exit.\n";
+	"\t-h           Show this help and exit.\n"
+	"\t-v           Show program version and exit.\n";
 
 	if (error)
 		fprintf (stderr, "%s\n", text);
