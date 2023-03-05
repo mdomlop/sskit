@@ -1,5 +1,5 @@
 #define PKGNAME      "sstools"
-#define VERSION      "0.3b"
+#define VERSION      "0.4b"
 #define URL          "https://github.com/mdomlop/sstools"
 #define LICENSE      "GPLv3+"
 #define AUTHOR       "Manuel Domínguez López"
