@@ -42,7 +42,7 @@ void help (int error)
 	else
 	{
 		version();
-		printf ("%s\n", text);
+		printf ("%s\n\n%s\n", DESCRIPTION, text);
 	}
 }
 

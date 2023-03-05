@@ -28,8 +28,9 @@ int diff = 0;
 
 void version (void)
 {
-	printf ("%s Version: %s\n\n%s\n", PROGRAM, VERSION, DESCRIPTION);
+	printf ("%s Version: %s\n", PROGRAM, VERSION);
 }
+
 
 
 void help (int error)
@@ -47,7 +48,7 @@ void help (int error)
 	else
 	{
 		version();
-		printf ("%s\n", text);
+		printf ("%s\n\n%s\n", DESCRIPTION, text);
 	}
 }
 
