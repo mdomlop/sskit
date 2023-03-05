@@ -24,8 +24,8 @@ $(DEBIANDIR)/DEBIAN/copyright: copyright $(DEBIANDIR)/DEBIAN
 $(DEBIANDIR)/DEBIAN/control: $(DEBIANDIR)/DEBIAN
 	echo 'Package: $(PKGNAME)' > $@
 	echo 'Version: $(VERSION)' >> $@
-	echo 'Architecture: all' >> $@
-	echo 'Depends: libbtrfsutil1' >> $@
+	echo 'Architecture: $(DARCHI)' >> $@
+	echo 'Depends: $(DEBIANDEPS)' >> $@
 	echo 'Description: $(DESCRIPTION)' >> $@
 	echo 'Section: main' >> $@
 	echo 'Priority: optional' >> $@
@@ -33,14 +33,17 @@ $(DEBIANDIR)/DEBIAN/control: $(DEBIANDIR)/DEBIAN
 	echo 'Homepage: $(URL)' >> $@
 	echo 'Installed-Size: 1' >> $@
 
+$(DEBIANDIR)/DEBIAN/conffiles: $(DEBIANDIR)/DEBIAN
+	echo '/etc/sstab' > $@
+
 pkg_debian: $(DEBIANPKG)
 $(DEBIANPKG): $(DEBIANDIR)
 	cp README.md $(DEBIANDIR)/DEBIAN/README
 	dpkg-deb --build --root-owner-group $(DEBIANDIR)
 
-$(DEBIANDIR): makefile $(DEBIANDIR)/DEBIAN/control $(DEBIANDIR)/DEBIAN/copyright
+$(DEBIANDIR): makefile $(DEBIANDIR)/DEBIAN/control $(DEBIANDIR)/DEBIAN/copyright $(DEBIANDIR)/DEBIAN/conffiles
 	make install DESTDIR=$(DEBIANDIR)
 	sed -i "s/Installed-Size:.*/Installed-Size:\ $$(du -ks $(DEBIANDIR) | cut -f1)/" $<
 
 clean_debian:
-	rm -rf control DEBIAN DEBIANTEMP $(DEBIANDIR)
+	rm -rf control DEBIAN DEBIANTEMP $(DEBIANDIR) $(DEBIANPKG)
