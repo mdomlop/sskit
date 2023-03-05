@@ -150,10 +150,10 @@ man/%.5: man/%.5.md
 
 zman1: $(ZMAN1)
 man/%.1.gz: man/%.1
-	gzip -k $^
+	gzip -kf $^
 
 zman5: $(ZMAN5)
 man/%.5.gz: man/%.5
-	gzip -k $^
+	gzip -kf $^
 
 .PHONY: clean arch_clean uninstall
