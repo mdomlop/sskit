@@ -41,16 +41,12 @@ INSTALLED_MANS = $(INSTALLED_MAN1) $(INSTALLED_MAN5)
 
 ELFS = $(addsuffix .elf,$(addprefix src/,$(BINARIES)))
 
-PKGEXT=.pkg.tar.zst
-ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(shell uname -m)$(PKGEXT)
 
 all: elf zman
 
-install: install_elf LICENSE README.md install_confs install_manuals systemd_arch_install_services
+install: install_elf LICENSE README.md install_confs install_manuals install_systemd_services
 	install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/share/licenses/$(PKGNAME)/COPYING
 	install -Dm 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(PKGNAME)/README
-
-arch_install: install
 
 %.elf: %.c $(HEADERS)
 	$(CC) $< -o $@ $(CFLAGS)
@@ -64,12 +60,13 @@ install_elf_opti: elf_opti install
 debug: CFLAGS = -Wall -ggdb3
 debug: src/$(PKGNAME)
 
+
 install_elf: $(INSTALLED_BINARIES)
 $(DESTDIR)$(PREFIX)/bin/%: src/%.elf
 	install -dm 755 $(DESTDIR)$(PREFIX)/bin/
 	install -Dm 755 $^ $@
 
-systemd_arch_install_services: $(INSTALLED_SERVICES)
+install_systemd_services: $(INSTALLED_SERVICES)
 $(DESTDIR)$(PREFIX)/lib/systemd/system/%.service: src/%.service
 	install -dm 755 $(DESTDIR)$(PREFIX)/lib/systemd/system/
 	install -Dm 644 $^ $@
@@ -87,59 +84,26 @@ $(DESTDIR)$(PREFIX)/share/man/man5/%.5.gz: man/%.5.gz
 	install -dm 755 $(DESTDIR)$(PREFIX)/share/man/man5/
 	install -Dm 644 $^ $@
 
-uninstall:
+
+uninstall: uninstall_systemd_services uninstall_manuals
 	rm -f $(INSTALLED_BINARIES)
 	rm -f $(PREFIX)/share/licenses/$(PKGNAME)/LICENSE
 	rm -f $(PREFIX)/share/doc/$(PKGNAME)/README
 
-arch_uninstall: uninstall arch_uninstall_services
-
-arch_uninstall_services:
+uninstall_systemd_services:
 	rm -f $(DESTDIR)$(PREFIX)/lib/systemd/system/$(EXECUTABLE)d.service
 
-arch_clean:
-	rm -rf pkg
-	rm -f PKGBUILD
-	rm -f $(PKGNAME)-*$(PKGEXT)
+uninstall_manuals:
+	rm -f $(INSTALLED_MANS)
 
-clean: arch_clean clean_debian
+
+clean: clean_arch clean_debian clean_ocs
 	rm -f $(ELFS)
 	rm -f $(ZMAN)
 
 purge: clean
 	rm -rf $(MAN1)
 
-arch_pkg: $(ARCHPKG)
-$(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(SERVICES) $(CONFS)
-	makepkg -df PKGDEST=./ BUILDDIR=./ PKGEXT='$(PKGEXT)'
-	@echo
-	@echo Package done!
-	@echo You can install it as root with:
-	@echo pacman -U $@
-
-PKGBUILD:
-	echo '# Maintainer: Manuel Domínguez López <$(MAIL)>' > $@
-	echo '_pkgver_year=2018' >> $@
-	echo '_pkgver_month=07' >> $@
-	echo '_pkgver_day=26' >> $@
-	echo 'pkgname=$(PKGNAME)' >> $@
-	echo 'pkgver=$(VERSION)' >> $@
-	echo 'pkgrel=1' >> $@
-	echo 'pkgdesc="$(DESCRIPTION)"' >> $@
-	echo 'arch=("i686" "x86_64")' >> $@
-	echo 'makedepends=("btrfs-progs")' >> $@
-	echo 'url="$(URL)"' >> $@
-	echo 'source=()' >> $@
-	echo 'license=("$(LICENSE)")' >> $@
-	echo 'backup=(etc/sstab)' >> $@
-	echo 'build() {' >> $@
-	echo 'cd $$startdir' >> $@
-	echo 'make' >> $@
-	echo '}' >> $@
-	echo 'package() {' >> $@
-	echo 'cd $$startdir' >> $@
-	echo 'make arch_install DESTDIR=$$pkgdir' >> $@
-	echo '}' >> $@
 
 man: man1 man5
 zman: zman1 zman5
@@ -160,6 +124,8 @@ zman5: $(ZMAN5)
 man/%.5.gz: man/%.5
 	gzip -kf $^
 
+include arch.mk
 include debian.mk
+include ocs.mk
 
 .PHONY: clean arch_clean uninstall
