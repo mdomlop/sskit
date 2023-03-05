@@ -15,18 +15,18 @@
 # snapshots does not exceed quota number.
 
 
-# subvolume    pool                           frequency    quota
+# subvolume              pool                         frequency    quota
 #############################################################################
 
 # On boot
-/                        /backup/ss/system/boot       0            30
-#/home                   /backup/ss/home/boot         0            30
+/                        /backup/ss/system/boot       0             30
+#/home                   /backup/ss/home/boot         0             30
 
 # Daily
-/                        /backup/ss/system/daily      1d           30
+/                        /backup/ss/system/daily      1d            30
 
 # Hourly
-#/home                   /backup/ss/home/hourly       1h           30
+#/home                   /backup/ss/home/hourly       1h            30
 
 # 30m
-#/home/mdl/Documentos     /backup/ss/mydocs/30m        30m          50
+#/home/mdl/Documentos     /backup/ss/mydocs/30m       30m           50
