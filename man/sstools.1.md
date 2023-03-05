@@ -41,20 +41,18 @@ Additionally, it also integrates the following tools:
 
 ## Not implemented yet tools
 
-- _ssst: Shows some statics of interest.
+- _ssst_: Shows some statics of interest.
 - _ssgui_: Graphic user interface.
 
 
 ## Basic operation
 
-On startup **sstd** loads `/etc/sstab` (see sstab(5)) into memory and
+Edit `/etc/sstab` at your preferences and then start and enable
+the systemd provided service `sstd.service`.
+
+On startup **sstd** will load `/etc/sstab` (see sstab(5)) into memory and
 periodically creates or deletes snapshots in the specified _pool_
 directory.
-
-For this task a systemd service file is provided.
-
-Edit `/etc/sstab` at your preferences and then start and enable
-`sstd.service`.
 
 ### `/etc/sstab`
 
@@ -66,9 +64,8 @@ Read  more about it in snapman(5).
 
 #### Example file:
 
-
     # subvolume    pool               frequency    quota
- 
+
     /              /backup/root/boot  0            30
     /              /backup/root/diary 1d           30
     /home          /backup/home/30m   30m          20
@@ -130,11 +127,11 @@ Graphic user interface.
 # SEE ALSO
 
 sstab(5)
-	
+
 # AUTHOR
 
 Manuel Domínguez López <mdomlopatgmaildotcom>
-	
+
 # COPYRIGHT
 
 GPLv3
