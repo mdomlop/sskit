@@ -21,14 +21,12 @@ Basic operation
 ---------------
 
 On startup sstd loads `/etc/sstab` into memory and creates snapshots, that are
-stored in the specified _pool_ directory. 
+stored in the specified _pool_ directory.
 
-Time when an inode in this subvolume was last change
-
-#### Example of `/etc/sstab` snapshot table
+#### Example of `/etc/sstab`
 
     # subvolume    pool               frequency    quota
- 
+
     /              /backup/root/boot  0            30
     /              /backup/root/diary 1d           30
     /home          /backup/home/30m   30m          20
