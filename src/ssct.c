@@ -33,8 +33,8 @@ void help (int error)
 	EXECUTABLE
 	" [-h] [-v] path\n"
 	"\nOptions:\n"
-	"\t-h	Show this help and exit.\n"
-	"\t-v	Show program version and exit.\n";
+	"\t-h           Show this help and exit.\n"
+	"\t-v           Show program version and exit.\n";
 
 	if (error)
 		fprintf (stderr, "%s\n", text);

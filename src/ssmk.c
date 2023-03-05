@@ -50,13 +50,13 @@ void help (int error)
 {
 	char text[] = "\nUsage:\n\n"
 
-	"\t-i subv			  Set the subvolume.\n"
-	"\t-o dir			   Set the output directory.\n\n"
+	"\t-i subv      Set the subvolume.\n"
+	"\t-o dir       Set the output directory.\n\n"
 
-	"\t-f freq			  Set the frequency.\n"
+	"\t-f freq      Set the frequency.\n"
 
-	"\t-h				   Show this help and exit.\n"
-	"\t-v				   Show program version and exit.\n";
+	"\t-h           Show this help and exit.\n"
+	"\t-v           Show program version and exit.\n";
 
 	if (error)
 		fprintf (stderr, "%s\n", text);
