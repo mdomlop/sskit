@@ -19,7 +19,7 @@
 #define NICK         "mdomlop"
 #define MAIL         "zqbzybc@tznvy.pbz"
 
-
+#define TIMESTAMP    "%F %T"
 
 void version (void)
 {
@@ -130,10 +130,10 @@ int main(int argc, char **argv)
 			myctime = info.ctime.tv_sec;
 
 			mytm = localtime(&myotime);
-			strftime(otime, sizeof otime, "%F %T", mytm);
+			strftime(otime, sizeof otime, TIMESTAMP, mytm);
 
 			mytm = localtime(&myctime);
-			strftime(ctime, sizeof ctime, "%F %T", mytm);
+			strftime(ctime, sizeof ctime, TIMESTAMP, mytm);
 
             printf("Created: %s\nLast changed: %s\n", otime, ctime);
         }
