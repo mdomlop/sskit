@@ -1,15 +1,15 @@
 ---
-title: SSTOOLS
+title: SSKIT
 section: 1
 header: User Manual
-footer: sstools 0.2b
+footer: sskit 0.4b
 date: March 04, 2023
 ---
 
 
 # NAME
 
-sstools - KISS tools for make snapshots in a Btrfs filesystem
+sskit - KISS tools for make snapshots in a Btrfs filesystem
 
 # SYNOPSYS
 
@@ -24,7 +24,7 @@ sstools - KISS tools for make snapshots in a Btrfs filesystem
 
 # DESCRIPTION
 
-SSTools is made up of several small programs that work together, functioning
+SSKit is made up of several small programs that work together, functioning
 as one.
 
 ## Currently main tools

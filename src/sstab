@@ -1,5 +1,5 @@
 # /etc/sstab
-# Snapshots table is part of sstools, but can be used for others.
+# Snapshots table is part of sskit, but can be used for others.
 # Only lines wich starts with '/' character will be procesed.
 
 # First field is the source btrfs subvolume, the second one is the pool,

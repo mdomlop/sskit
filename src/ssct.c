@@ -11,7 +11,7 @@
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
-#include "sstools.h"
+#include "sskit.h"
 
 
 #define TIMESTAMP    "%F %T"

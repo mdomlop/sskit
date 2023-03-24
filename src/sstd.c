@@ -10,7 +10,7 @@
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <unistd.h>  /* for getpid() */
 #include <signal.h>
-#include "sstools.h"
+#include "sskit.h"
 
 #define CONFIGFILE "/etc/sstab"
 #define PIDFILE "/tmp/sstd.pid"

@@ -2,14 +2,14 @@
 title: SSTAB
 section: 5
 header: User Manual
-footer: sstools 0.2b
+footer: sskit 0.4b
 date: March 04, 2023
 ---
 
 
 # NAME
 
-sstab - Configuration file of sstools.
+sstab - Configuration file of sskit.
 
 # LOCATION
 	`/etc/sstab`
@@ -17,7 +17,7 @@ sstab - Configuration file of sstools.
 
 # DESCRIPTION
 
-Snapshots table (`/etc/sstab`) is part of sstools, but
+Snapshots table (`/etc/sstab`) is part of sskit, but
 its siple format allow that can be used for other
 utilities.
 
@@ -64,7 +64,7 @@ olders snapshots will be deleted until the total number of snapshots does not ex
 
 # SEE ALSO
 
-sstools(1)
+sskit(1)
 	
 # AUTHOR
 

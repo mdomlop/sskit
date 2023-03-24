@@ -1,12 +1,12 @@
-#################
-#### SSTools ####
-#################
+###############
+#### SSKit ####
+###############
 
 SOURCES = src/sstd.c src/ssmk.c src/sscl.c src/ssct.c #src/ssls.c
-HEADERS = src/sstools.h
+HEADERS = src/sskit.h
 SERVICES = src/sstd.service
 CONFS = src/sstab
-MANDOC1 = man/sstools.1.md
+MANDOC1 = man/sskit.1.md
 MANDOC5 = man/sstab.5.md
 
 NAME = $(shell grep -m1 PROGRAM $(firstword $(HEADERS)) | cut -d\" -f2)

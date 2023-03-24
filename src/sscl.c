@@ -12,7 +12,7 @@
 #include <linux/limits.h>  /* for PATH_MAX */
 #include <dirent.h>  // opendir()
 #include <string.h> /* strlen() */
-#include "sstools.h"
+#include "sskit.h"
 
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000

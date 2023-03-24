@@ -5,8 +5,8 @@ pkg/
 *.rpm
 PKGBUILD
 *.gz
-sstools*/
-sstools.tar.xz
+sskit*/
+sskit.tar.xz
 
 # Swap files
 *.kate-swp

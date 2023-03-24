@@ -1,9 +1,9 @@
-SSTools (SnapShot tools)
-========================
+SSKit (SnapShot Kit)
+====================
 
 KISS tools for make snapshots in a Btrfs filesystem.
 
-SSTools is made up of several small programs that work together, functioning
+SSKit is made up of several small programs that work together, functioning
 as one. Currently:
 
 - sstd: Snapshot tools daemon

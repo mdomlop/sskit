@@ -14,7 +14,7 @@
 #include <ctype.h>  /* isdigit() */
 #include <dirent.h>
 #include <btrfsutil.h>
-#include "sstools.h"
+#include "sskit.h"
 
 #define PATH_MAX_STRING_SIZE 256
 
