@@ -48,7 +48,11 @@ Additionally, it also integrates the following tools:
 ## Basic operation
 
 Edit `/etc/sstab` at your preferences and then start and enable
-the systemd provided service `sstd.service`.
+the provided service:
+
+For systemd: `sstd.service`.
+
+For dinit: sstd
 
 On startup **sstd** will load `/etc/sstab` (see sstab(5)) into memory and
 periodically creates or deletes snapshots in the specified _pool_

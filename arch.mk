@@ -30,7 +30,7 @@ PKGBUILD:
 	echo '}' >> $@
 
 pkg_arch: $(ARCHPKG)
-$(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(SERVICES) $(CONFS)
+$(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(SYSTEMD) $(CONFS)
 	makepkg -df PKGDEST=./ BUILDDIR=./ PKGEXT='$(PKGEXT)'
 	@echo
 	@echo Package done!
