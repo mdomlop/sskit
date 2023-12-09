@@ -2,7 +2,7 @@
 title: SSTAB
 section: 5
 header: User Manual
-footer: sskit 0.6b
+footer: sskit 0.4b
 date: March 04, 2023
 ---
 
