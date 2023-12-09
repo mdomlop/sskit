@@ -89,12 +89,14 @@ uninstall_manuals:
 	rm -f $(INSTALLED_MANS)
 
 
-clean: clean_arch clean_debian clean_ocs
+clean: clean_arch clean_debian clean_ocs clean_dinit clean_systemd
 	rm -f $(ELFS)
 	rm -f $(ZMAN)
 
-purge: clean
-	rm -rf $(MAN1)
+purge: clean purge_dinit purge_systemd
+
+mrproper: purge
+	rm -rf $(MAN1) $(MAN5)
 
 
 man: man1 man5
@@ -120,6 +122,19 @@ include arch.mk
 include debian.mk
 include ocs.mk
 
-pkg: pkg_arch pkg_debian pkg_ocs
+pkg_dinit:
+	cd dist/dinit; make
+pkg_systemd:
+	cd dist/systemd; make
+clean_dinit:
+	cd dist/dinit; make clean
+clean_systemd:
+	cd dist/systemd; make clean
+purge_dinit:
+	cd dist/dinit; make purge
+purge_systemd:
+	cd dist/systemd; make purge
+
+pkg: pkg_arch pkg_debian pkg_ocs pkg_dinit pkg_systemd
 
 .PHONY: clean arch_clean uninstall
