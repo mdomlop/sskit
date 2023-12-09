@@ -1,0 +1,10 @@
+Package: sskit-runit
+Version: 0.6b
+Architecture: amd64
+Depends: sskit
+Description: Runit services for sskit.
+Section: main
+Priority: optional
+Maintainer: Manuel Domínguez López <mdomlop@gmail.com>
+Homepage: https://github.com/mdomlop/sskit
+Installed-Size: 12
