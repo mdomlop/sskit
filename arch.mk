@@ -40,4 +40,6 @@ $(ARCHPKG): PKGBUILD makefile LICENSE README.md $(SOURCES) $(CONFS)
 clean_arch:
 	rm -rf pkg
 	rm -f PKGBUILD
+
+purge_arch: clean_arch
 	rm -f $(PKGNAME)-*$(PKGEXT)

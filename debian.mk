@@ -46,4 +46,7 @@ $(DEBIANDIR): makefile $(DEBIANDIR)/DEBIAN/control $(DEBIANDIR)/DEBIAN/copyright
 	sed -i "s/Installed-Size:.*/Installed-Size:\ $$(du -ks $(DEBIANDIR) | cut -f1)/" $<
 
 clean_debian:
-	rm -rf control DEBIAN DEBIANTEMP $(DEBIANDIR) $(DEBIANPKG)
+	rm -rf control DEBIAN DEBIANTEMP $(DEBIANDIR)
+
+purge_debian:
+	rm -f $(DEBIANPKG)

@@ -7,4 +7,6 @@ $(OCSPKG):
 
 clean_ocs:
 	rm -rf $(PKGNAME)
+
+purge_ocs:
 	rm -f $(OCSPKG)

@@ -93,7 +93,7 @@ clean: clean_arch clean_debian clean_ocs clean_dinit clean_systemd
 	rm -f $(ELFS)
 	rm -f $(ZMAN)
 
-purge: clean purge_dinit purge_systemd
+purge: clean purge_arch purge_debian purge_ocs purge_dinit purge_systemd
 
 mrproper: purge
 	rm -rf $(MAN1) $(MAN5)
