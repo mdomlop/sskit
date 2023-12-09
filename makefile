@@ -8,10 +8,6 @@ CONFS = src/sstab
 MANDOC1 = man/sskit.1.md
 MANDOC5 = man/sstab.5.md
 
-#SYSTEMD = src/sstd.systemd
-#RUNIT = src/sstd.runit
-#DINIT = src/sstd.dinit
-
 NAME = $(shell grep -m1 PROGRAM $(firstword $(HEADERS)) | cut -d\" -f2)
 EXECUTABLE = $(shell grep -m1 EXECUTABLE $(firstword $(HEADERS)) | cut -d\" -f2)
 PKGNAME = $(shell grep -m1 PKGNAME $(firstword $(HEADERS)) | cut -d\" -f2)

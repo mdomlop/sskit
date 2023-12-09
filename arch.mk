@@ -5,9 +5,9 @@ ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(ARCHI)$(PKGEXT)
 
 PKGBUILD:
 	echo '# Maintainer: Manuel Domínguez López <$(MAIL)>' > $@
-	echo '_pkgver_year=2018' >> $@
-	echo '_pkgver_month=07' >> $@
-	echo '_pkgver_day=26' >> $@
+	echo '_pkgver_year=2023' >> $@
+	echo '_pkgver_month=12' >> $@
+	echo '_pkgver_day=09' >> $@
 	echo 'pkgname=$(PKGNAME)' >> $@
 	echo 'pkgver=$(VERSION)' >> $@
 	echo 'pkgrel=1' >> $@
