@@ -13,7 +13,7 @@ sskit - KISS tools for make snapshots in a Btrfs filesystem
 
 # SYNOPSYS
 
-**sstd**
+**sskd**
 
 **ssmk** [*-vh*] *-i* subvolume *-o* pool *-f* frequency
 
@@ -29,7 +29,7 @@ as one.
 
 ## Currently main tools
 
-- _sstd_: Snapshot tools daemon.
+- _sskd_: Snapshot tools daemon.
 - _ssmk_: For making snapshots.
 - _sscl_: For cleaning snapshots.
 
@@ -50,11 +50,11 @@ Additionally, it also integrates the following tools:
 Edit `/etc/sstab` at your preferences and then start and enable
 the provided service:
 
-For systemd: `sstd.service`.
+For systemd: `sskd.service`.
 
-For dinit: sstd
+For dinit: sskd
 
-On startup **sstd** will load `/etc/sstab` (see sstab(5)) into memory and
+On startup **sskd** will load `/etc/sstab` (see sstab(5)) into memory and
 periodically creates or deletes snapshots in the specified _pool_
 directory.
 
@@ -83,7 +83,7 @@ fit to the quota.
 
 # INCLUDED TOOLS
 
-## sstd
+## sskd
 
 Is the daemon. Loads `/etc/sstab` into memory and starts an infinite
 loop where firstly runs `ssmk` and then `sscl` for each line of such file.
@@ -92,7 +92,7 @@ By default the loop repeats itself every 5 seconds, but it can be changed
 setting a _period_ in command line.
 
     Usage:
-            sstd [-h] [-v] [period]
+            sskd [-h] [-v] [period]
 
     Options:
             period       Time in seconds for loop repeat. Defaults to 5.

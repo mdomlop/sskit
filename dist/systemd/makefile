@@ -1,5 +1,5 @@
 ############################
-#### SSTD Systemd inits ####
+#### SSKD Systemd inits ####
 ############################
 
 HEADERS = ../../src/sskit.h
@@ -8,7 +8,7 @@ PKGNAME = sskit-systemd
 PREFIX = 'lib/systemd/system'
 DESTDIR = ''
 
-DESCRIPTION = Dinit service for sstd (part of sskit)
+DESCRIPTION = Dinit service for sskd (part of sskit)
 VERSION = 1
 AUTHOR = $(shell grep -m1 AUTHOR $(firstword $(HEADERS)) | cut -d\" -f2)
 MAIL := $(shell grep -m1 MAIL $(firstword $(HEADERS)) | cut -d\" -f2 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]')
@@ -17,7 +17,7 @@ LICENSE = $(shell grep -m1 LICENSE $(firstword $(HEADERS)) | cut -d\" -f2)
 
 all: pkg_arch pkg_debian
 
-install: sstd.service
+install: sskd.service
 	install -dm 755 $(DESTDIR)/$(PREFIX)/
 	install -Dm 644 $^ $(DESTDIR)/$(PREFIX)/
 

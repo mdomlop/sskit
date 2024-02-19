@@ -2,7 +2,7 @@
 #### SSKit ####
 ###############
 
-SOURCES = src/sstd.c src/ssmk.c src/sscl.c src/ssct.c #src/ssls.c
+SOURCES = src/sskd.c src/ssmk.c src/sscl.c src/ssct.c src/ssls.c
 HEADERS = src/sskit.h
 CONFS = src/sstab
 MANDOC1 = man/sskit.1.md

@@ -1,0 +1,10 @@
+[Unit]
+Description=SSKit Daemon.
+
+[Service]
+Type=simple
+PIDFile=/run/sskd.pid
+ExecStart=/usr/bin/sskd
+
+[Install]
+WantedBy=multi-user.target

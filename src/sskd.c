@@ -1,6 +1,6 @@
 #define PROGRAM      "SnaphotDaemon"
-#define EXECUTABLE   "sstd"
-#define DESCRIPTION  "Daemon for making snapshots in a Btrfs filesystem."
+#define EXECUTABLE   "sskd"
+#define DESCRIPTION  "SSKit Daemon for making snapshots in a Btrfs filesystem."
 
 #include <stdio.h>
 #include <stdlib.h> /* exit() */
@@ -13,7 +13,7 @@
 #include "sskit.h"
 
 #define CONFIGFILE "/etc/sstab"
-#define PIDFILE "/tmp/sstd.pid"
+#define PIDFILE "/run/sskd.pid" /*FHS version 3.0*/
 
 /* Btrfs has not this limit, but I think this value is very safe. */
 #define SNAPLISTSIZE 64000

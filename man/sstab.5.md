@@ -21,7 +21,7 @@ Snapshots table (`/etc/sstab`) is part of sskit, but
 its siple format allow that can be used for other
 utilities.
 
-When  you  run `sstd` it will read this file and then
+When  you  run `sskd` it will read this file and then
 it will make backups (snapshots) of indicated
 subvolumes at desired frequency until reach a defined
 quota. I  quota were  reached,  then  it will remove
@@ -55,7 +55,7 @@ olders snapshots will be deleted until the total number of snapshots does not ex
 
 
     # subvolume    pool               frequency    quota
- 
+
     /              /backup/root/boot  0            30
     /              /backup/root/diary 1d           30
     /home          /backup/home/30m   30m          20
@@ -65,11 +65,11 @@ olders snapshots will be deleted until the total number of snapshots does not ex
 # SEE ALSO
 
 sskit(1)
-	
+
 # AUTHOR
 
 Manuel Domínguez López <mdomlopatgmaildotcom>
-	
+
 # COPYRIGHT
 
 GPLv3

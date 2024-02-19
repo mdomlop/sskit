@@ -105,21 +105,25 @@ int main(int argc, char **argv)
     {
         if (check_is_subvol(subvol))
         {
-struct btrfs_util_subvolume_iterator *iter;
-enum btrfs_util_error err;
-char *path;
-struct btrfs_util_subvolume_info info;
+			puts("Es un subvolumen");
+			return 0;
+			struct btrfs_util_subvolume_iterator *iter;
+			enum btrfs_util_error err;
+			char *path;
+			struct btrfs_util_subvolume_info info;
 
-btrfs_util_create_subvolume_iterator(subvol, 0,
+			btrfs_util_create_subvolume_iterator(subvol, 0,
 				     5,
 				     &iter);
-while (!(err = btrfs_util_subvolume_iterator_next_info(iter, &path, &info))) {
-	printf("%s: %ld %ld %s\n", subvol, info.id, info.parent_id, path);
-	free(path);
-}
-btrfs_util_destroy_subvolume_iterator(iter);
+			while (!(err = btrfs_util_subvolume_iterator_next_info(iter, &path, &info)))
+			{
+				printf("%s: %ld %ld %s\n", subvol, info.id, info.parent_id, path);
+				free(path);
+			}
+			btrfs_util_destroy_subvolume_iterator(iter);
         }
         else
+			puts("No es un subvolumen");
             return 1;
     }
 

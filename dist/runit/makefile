@@ -1,5 +1,5 @@
-PKGNAME_BASE=sstd
-PKGNAME=sstd-runit
+PKGNAME_BASE=sskd
+PKGNAME=sskd-runit
 VERSION=1
 DARCHI = $(shell dpkg --print-architecture)
 DEBIANDIR = $(PKGNAME)-$(VERSION)_$(DARCHI)

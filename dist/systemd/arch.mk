@@ -32,7 +32,7 @@ PKGBUILD:
 	echo '}' >> $@
 
 pkg_arch: $(ARCHPKG)
-$(ARCHPKG): PKGBUILD makefile sstd.service $(HEADERS)
+$(ARCHPKG): PKGBUILD makefile sskd.service $(HEADERS)
 	makepkg -df PKGDEST=./ BUILDDIR=./ PKGEXT='$(PKGEXT)'
 	@echo
 	@echo Package done!

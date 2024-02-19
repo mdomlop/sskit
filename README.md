@@ -6,7 +6,7 @@ KISS tools for make snapshots in a Btrfs filesystem.
 SSKit is made up of several small programs that work together, functioning
 as one. Currently:
 
-- sstd: Snapshot tools daemon
+- sskd: Daemon for making snapshots.
 - ssmk: Makes snapshots only if necessary.
 - sscl: Clean snapshots when is necessary.
 
@@ -20,7 +20,7 @@ Additionally, it also integrates the following tools:
 Basic operation
 ---------------
 
-On startup sstd loads `/etc/sstab` into memory and creates snapshots, that are
+On startup sskd loads `/etc/sstab` into memory and creates snapshots, that are
 stored in the specified _pool_ directory.
 
 #### Example of `/etc/sstab`
@@ -38,7 +38,7 @@ _pool_, until reach the _quota_, and then, when quota were overpassed, it will
 deletes the oldest snapshot until fit to the quota.
 
 
-sstd
+sskd
 -----
 
 Is the daemon. Loads `/etc/sstab` into memory and runs first `ssmk` and then

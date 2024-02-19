@@ -1,5 +1,5 @@
 type            = process
-command         = /usr/bin/sstd
+command         = /usr/bin/sskd
 smooth-recovery = true
-logfile         = /var/log/sstd.log
+logfile         = /var/log/sskd.log
 waits-for       = mount-all
