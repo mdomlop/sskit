@@ -24,8 +24,8 @@ PKGBUILD:
 	echo 'source=()' >> $@
 	echo 'license=("$(LICENSE)")' >> $@
 	#echo 'backup=(etc/sstab)' >> $@
-	echo 'depends=("sskit")'
-	echo 'groups=("dinit-world")'
+	echo 'depends=("sskit")' >> $@
+	echo 'groups=("dinit-world")' >> $@
 	echo 'package() {' >> $@
 	echo 'cd $$startdir' >> $@
 	echo 'make install DESTDIR=$$pkgdir' >> $@
