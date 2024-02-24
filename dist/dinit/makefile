@@ -9,7 +9,7 @@ PREFIX = 'etc/dinit.d'
 DESTDIR = ''
 
 DESCRIPTION = Dinit service for sskd (part of sskit)
-VERSION = 1
+VERSION = 1.1
 AUTHOR = $(shell grep -m1 AUTHOR $(firstword $(HEADERS)) | cut -d\" -f2)
 MAIL := $(shell grep -m1 MAIL $(firstword $(HEADERS)) | cut -d\" -f2 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]')
 URL = $(shell grep -m1 URL $(firstword $(HEADERS)) | cut -d\" -f2)
