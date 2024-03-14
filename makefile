@@ -122,10 +122,15 @@ include arch.mk
 include debian.mk
 include ocs.mk
 
-pkg_dinit:
-	cd dist/dinit; make
-pkg_systemd:
-	cd dist/systemd; make
+pkg_dinit_arch:
+	cd dist/dinit; make pkg_arch
+pkg_dinit_debian:
+	cd dist/dinit; make pkg_debian
+pkg_systemd_arch:
+	cd dist/systemd; make pkg_arch
+pkg_systemd_debian:
+	cd dist/systemd; make pkg_debian
+
 clean_dinit:
 	cd dist/dinit; make clean
 clean_systemd:
@@ -135,6 +140,6 @@ purge_dinit:
 purge_systemd:
 	cd dist/systemd; make purge
 
-pkg: pkg_arch pkg_debian pkg_ocs pkg_dinit pkg_systemd
+pkg: pkg_arch pkg_debian pkg_ocs pkg_dinit_arch pkg_dinit_debian pkg_systemd_arch pkg_dinit_debian
 
 .PHONY: clean arch_clean uninstall
