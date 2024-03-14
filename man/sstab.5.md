@@ -2,8 +2,8 @@
 title: SSTAB
 section: 5
 header: User Manual
-footer: sskit 0.6b
-date: March 04, 2023
+footer: sskit 0.8.1b
+date: 2024-03-14
 ---
 
 
