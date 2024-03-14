@@ -104,10 +104,14 @@ zman: zman1 zman5
 
 man1: $(MAN1)
 man/%.1: man/%.1.md
+	sed -i "/^footer: sskit/c\footer: sskit $(VERSION)" $^
+	sed -i "/^date: /c\date: $(shell date -I)" $^
 	pandoc $^ -s -t man -o $@
 
 man5: $(MAN5)
 man/%.5: man/%.5.md
+	sed -i "/^footer: sstab/c\footer: sskit $(VERSION)" $^
+	sed -i "/^date: /c\date: $(shell date -I)" $^
 	pandoc $^ -s -t man -o $@
 
 zman1: $(ZMAN1)
