@@ -79,9 +79,9 @@ uninstall:
 	rm -f $(INSTALLED_DOCS)
 	rm -f $(INSTALLED_LICENSE)
 
-clean: clean_arch clean_debian clean_ocs clean_man
+clean: clean_arch clean_debian clean_ocs clean_man clean_dinit clean_systemd
 	rm -f $(ELFS)
 
-purge: clean purge_arch purge_debian purge_ocs
+purge: clean purge_arch purge_debian purge_ocs purge_dinit purge_systemd
 
 .PHONY: clean arch_clean uninstall

@@ -8,6 +8,7 @@ ARCHI = any
 PKGEXT=.pkg.tar.zst
 ARCHPKG = $(PKGNAME)-$(VERSION)-1-$(ARCHI)$(PKGEXT)
 
+
 PKGBUILD:
 	echo '# Maintainer: $(AUTHOR) <$(MAIL)>' > $@
 	echo '_pkgver_year=2018' >> $@
