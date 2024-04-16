@@ -2,7 +2,7 @@
 #### SSKD inits ####
 ####################
 
-HEADERS = ../../src/sskit.h
+HEADERS = ../../source/sskit.h
 
 PKGNAME = sskit-dinit
 PREFIX = 'etc/dinit.d'

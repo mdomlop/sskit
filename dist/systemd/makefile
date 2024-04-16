@@ -2,13 +2,13 @@
 #### SSKD Systemd inits ####
 ############################
 
-HEADERS = ../../src/sskit.h
+HEADERS = ../../source/sskit.h
 
 PKGNAME = sskit-systemd
 PREFIX = 'lib/systemd/system'
 DESTDIR = ''
 
-DESCRIPTION = Dinit service for sskd (part of sskit)
+DESCRIPTION = Systemd service for sskd (part of sskit)
 VERSION = 1
 AUTHOR = $(shell grep -m1 AUTHOR $(firstword $(HEADERS)) | cut -d\" -f2)
 MAIL := $(shell grep -m1 MAIL $(firstword $(HEADERS)) | cut -d\" -f2 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]')
