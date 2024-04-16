@@ -29,7 +29,7 @@ LDLIBS = -lbtrfsutil
 BINARIES = $(notdir $(basename $(SOURCES)))
 INSTALLED_BINARIES = $(addprefix $(DESTDIR)/$(PREFIX)/bin/,$(BINARIES))
 
-DOCS = $(basename README.md)
+DOCS = $(basename README.md changelog.md)
 INSTALLED_DOCS = $(addprefix $(DESTDIR)/$(PREFIX)/share/doc/$(PKGNAME)/,$(DOCS))
 INSTALLED_LICENSE = $(DESTDIR)$(PREFIX)/share/licenses/$(PKGNAME)/COPYING
 
