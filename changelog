@@ -6,7 +6,7 @@ sskit
 
 - System V init support.
 - Makefile: Splitted makefile.
-- Manpages: fix erratas.
+- Manpages: Improved manpages. Offer use of `cron` instead `sskd`.
 - `ssmk`: change `-i` to `-s` and `-o` to `-p`.
 
 
