@@ -1,6 +1,6 @@
 #define PKGNAME         "sskit"
 #define PKGDESCRIPTION  "KISS tools for make snapshots in a Btrfs filesystem."
-#define VERSION         "0.8.1b"
+#define VERSION         "0.8.3b"
 #define URL             "https://github.com/mdomlop/sskit"
 #define LICENSE         "GPLv3+"
 #define AUTHOR          "Manuel Domínguez López"

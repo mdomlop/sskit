@@ -39,13 +39,13 @@ void help (int error)
 {
 	char text[] = "\nUsage:\n\t"
 	EXECUTABLE
-	" [-h] [-v] -p dir -q quota -f freq\n"
+	" [-h] [-v] -s subvolume -p pool -f frequency\n"
 	"\nOptions:\n"
-	"\t-i subv      Set the subvolume.\n"
-	"\t-o dir       Set the output directory.\n"
-	"\t-f freq      Set the frequency.\n\n"
-	"\t-h           Show this help and exit.\n"
-	"\t-v           Show program version and exit.\n";
+	"\t-s subvolume     Set the source subvolume.\n"
+	"\t-p pool          Set the destination pool.\n"
+	"\t-f frequency     Set the frequency.\n\n"
+	"\t-h               Show this help and exit.\n"
+	"\t-v               Show program version and exit.\n";
 
 	if (error)
 		fprintf (stderr, "%s\n", text);
@@ -441,8 +441,8 @@ int main(int argc, char **argv)
 	int hflag, vflag;
 	hflag = vflag = 0;
 
-	char *ivalue = NULL;  // subvolume path
-	char *ovalue = NULL;  // directory path
+	char *svalue = NULL;  // subvolume path
+	char *pvalue = NULL;  // pool path
 	char *fvalue = NULL;  // frequency
 
 	int freq = 0;
@@ -461,14 +461,14 @@ int main(int argc, char **argv)
 
 	int is_older_ret;
 
-	while ((c = getopt (argc, argv, "i:o:f:hv")) != -1)
+	while ((c = getopt (argc, argv, "s:p:f:hv")) != -1)
 		switch (c)
 		{
-			case 'i':  // Set the subvolume
-				ivalue = optarg;
+			case 's':  // Set the subvolume
+				svalue = optarg;
 				break;
-			case 'o':  // Set the output directory
-				ovalue = optarg;
+			case 'p':  // Set the output directory
+				pvalue = optarg;
 				break;
 			case 'f':  // Set the frequency
 				freq = timetosecs(optarg);
@@ -521,7 +521,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (ivalue && ovalue && fvalue)
+	if (svalue && pvalue && fvalue)
 	{
 		// Set timestamp
 		time(&now); // Get current time
@@ -532,45 +532,45 @@ int main(int argc, char **argv)
 
 
 		//puts("Updating snap_path...");
-		strcpy(snap_path, ovalue);  // The path of to the snapshot
+		strcpy(snap_path, pvalue);  // The path of to the snapshot
 		strcat(snap_path, "/");
 		strcat(snap_path, timestamp);
 
 		if (check_path_size(snap_path))
 			return 1;
 
-		poolstatus = mkpool(ovalue);
+		poolstatus = mkpool(pvalue);
 
 		if (poolstatus == 2)  // Alredy exists, maybe be empty
 		{
-			get_snapshots(ovalue);
+			get_snapshots(pvalue);
 
-			if (DEBUG) printf("debug: %d snapshots (%s)\n", snapls_c, ovalue);
+			if (DEBUG) printf("debug: %d snapshots (%s)\n", snapls_c, pvalue);
 
 			if (snapls_c)  // Directory is not empty, get the lastsnap
 				strcpy(lastsnap, snaplist[snapls_c - 1]);
 			else  // Directory is empty, make a snapshot without looking any more
 			{
-				if (DEBUG) printf("debug: Directory is empty, make a snapshot without looking any more: %s\n", ovalue);
-				make_snapshot(ivalue, snap_path);
+				if (DEBUG) printf("debug: Directory is empty, make a snapshot without looking any more: %s\n", pvalue);
+				make_snapshot(svalue, snap_path);
 				return 0;
 			}
 
-			//printf("mksnp: Último snapshot: %s/%s\n", ovalue, lastsnap);
+			//printf("mksnp: Último snapshot: %s/%s\n", pvalue, lastsnap);
 
 			is_older_ret = is_older(lastsnap, epochsecs, freq);
 
 			if (is_older_ret == 0)
 			{
-				//if (DEBUG) printf("debug: No. It is not older enough: %s/%s\n", ovalue,lastsnap);
+				//if (DEBUG) printf("debug: No. It is not older enough: %s/%s\n", pvalue,lastsnap);
 				return 0;
 			}
 			else if (is_older_ret == 1)
 			{
-				if (has_changed(lastsnap, ivalue, ovalue))
+				if (has_changed(lastsnap, svalue, pvalue))
 				{
 					printf("New snapshot: %s\n", snap_path);
-					make_snapshot(ivalue, snap_path);
+					make_snapshot(svalue, snap_path);
 				}
 				else
 				{
@@ -596,13 +596,13 @@ int main(int argc, char **argv)
 		}
 		else if (poolstatus == 1)  // New pool
 		{
-			if (DEBUG) printf("debug: Directory is empty (new), make a snapshot without looking any more: %s\n", ovalue);
-			make_snapshot(ivalue, snap_path);
+			if (DEBUG) printf("debug: Directory is empty (new), make a snapshot without looking any more: %s\n", pvalue);
+			make_snapshot(svalue, snap_path);
 			return 0;
 		}
 		else
 		{
-			fprintf(stderr,"Fallo al crear pool_path: %s\n", ovalue);
+			fprintf(stderr,"Fallo al crear pool_path: %s\n", pvalue);
 			return 1;
 		}
 	}

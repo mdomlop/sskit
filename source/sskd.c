@@ -129,9 +129,9 @@ void commands(char *subv, char *pool, char *freq, char *quota)
 	char cmd_mk[PATH_MAX];
 	char cmd_cl[PATH_MAX];
 
-	strcpy(cmd_mk, "ssmk -i ");
+	strcpy(cmd_mk, "ssmk -s ");
 	strcat(cmd_mk, subv);
-	strcat(cmd_mk, " -o ");
+	strcat(cmd_mk, " -p ");
 	strcat(cmd_mk, pool);
 	strcat(cmd_mk, " -f ");
 	strcat(cmd_mk, freq);
@@ -348,6 +348,8 @@ int main(int argc, char **argv)
 		writepid();  // Check if another daemon is running. If then, kill it.
 
 		/* Daemonizing */
+		// if verbosity
+		printf("sskd: Running every %d seconds.", sleepsecs);
 		for (;;)
 		{
 			signal(SIGTERM, handle_sigterm);

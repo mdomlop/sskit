@@ -2,8 +2,8 @@
 title: SSKIT
 section: 1
 header: User Manual
-footer: sskit 0.8.1b
-date: 2024-03-27
+footer: sskit 0.8.3b
+date: 2024-04-16
 ---
 
 
@@ -13,13 +13,13 @@ sskit - KISS tools for make snapshots in a Btrfs filesystem
 
 # SYNOPSYS
 
-**sskd**
-
-**ssmk** [*-vh*] *-i* subvolume *-o* pool *-f* frequency
+**ssmk** [*-vh*] *-s* subvolume *-p* pool *-f* frequency
 
 **sscl** [*-vh*] *-p* pool *-q* quota
 
-**ssct** [*-h*] [*-v*] path
+**sskd** [*-vh*]
+
+**ssct** [*-vh*] path
 
 
 # DESCRIPTION
@@ -27,11 +27,83 @@ sskit - KISS tools for make snapshots in a Btrfs filesystem
 SSKit is made up of several small programs that work together, functioning
 as one.
 
+With the `ssmk` and `sscl` tools you can maintain a pool of snapshots of your
+subvolumes. `ssmk` will create a snapshot in the pool directory if the given
+frequency is met and `sscl`, for its part, will delete the oldest snapshots
+that exceed the given quota.
+
+
+## Basic operation
+
+To do this you can use the classic method, which involves using the standard
+`cron` program, or the one provided by this kit, which makes use of the
+specially dedicated tool `sskd`.
+
+### /etc/crontab
+
+If you want to use `crond` program, add to `/etc/crontab` some lines
+like these:
+
+        # Making snapshots:
+        @reboot   /usr/sbin/ssmk -s / -p /backup/root/boot    -f 0
+        * * * * * /usr/sbin/ssmk -s / -p /backup/root/diary   -f 1d
+        * * * * * /usr/sbin/ssmk -s /home -p /backup/home/30m -f 30m
+        # Cleaning pools:
+        @reboot   /usr/sbin/sscl -p /backup/root/boot  -q 30
+        * * * * * /usr/sbin/sscl -p /backup/root/diary -q 30
+        * * * * * /usr/sbin/sscl -p /backup/home/30m   -q 20
+
+See cron(8) and crontab(5) for details.
+
+As already said, alternatively to the _crond method_, `sskit` provides
+a simpler tool especially dedicated to this, `sskd`, which makes use
+of `/etc/sstab`.
+
+### `/etc/sstab`
+
+`sskit` provides a simple table named `/etc/sstab`, which is used as
+configuration file when `sskd` runs.
+
+The configuration file defines all the stuff about
+what and how the snapshots of subvolumes are taked.
+Read  more about it in sstab(5).
+
+For use `sskd` instead of `cron`, edit `/etc/sstab`:
+
+    # subvolume    pool               frequency    quota
+
+    /              /backup/root/boot  0            30
+    /              /backup/root/diary 1d           30
+    /home          /backup/home/30m   30m          20
+
+This example is functionally equivalent to the previous `cron` example.
+
+In every execution loop, if more time than indicated by the
+_frequency_ has passed, a new snapshot of the _subvolume_ will be
+created inside of its own _pool_, until reach the _quota_, and then,
+when quota were overpassed, it will deletes the oldest snapshot until
+fit to the quota.
+
+
+Edit `/etc/sstab` at your preferences and then start and enable
+the proper service for your init system. `sskit` include some
+services files, for example:
+
+- System V: `/etc/init.d/sskd start`
+
+- Systemd: `systemctl start sskd`
+
+- Dinit: `dinitctl start sskd`
+
+On startup **sskd** will load `/etc/sstab` into memory and
+periodically creates or deletes snapshots in the specified _pool_
+directory.
+
 ## Currently main tools
 
-- _sskd_: Snapshot tools daemon.
 - _ssmk_: For making snapshots.
 - _sscl_: For cleaning snapshots.
+- _sskd_: Snapshot tools daemon.
 
 ## Additional tools
 
@@ -45,41 +117,6 @@ Additionally, it also integrates the following tools:
 - _ssgui_: Graphic user interface.
 
 
-## Basic operation
-
-Edit `/etc/sstab` at your preferences and then start and enable
-the provided service:
-
-For systemd: `sskd.service`.
-
-For dinit: sskd
-
-On startup **sskd** will load `/etc/sstab` (see sstab(5)) into memory and
-periodically creates or deletes snapshots in the specified _pool_
-directory.
-
-### `/etc/sstab`
-
-A simple table, named `/etc/sstab` is provided as configuration file.
-
-The configuration file defines all the stuff about
-what and how the snapshots of subvolumes are taked.
-Read  more about it in snapman(5).
-
-#### Example file:
-
-    # subvolume    pool               frequency    quota
-
-    /              /backup/root/boot  0            30
-    /              /backup/root/diary 1d           30
-    /home          /backup/home/30m   30m          20
-
-
-In every execution loop, if more time than indicated by the
-_frequency_ has passed, a new snapshot of the _subvolume_ will be
-created inside of its own _pool_, until reach the _quota_, and then,
-when quota were overpassed, it will deletes the oldest snapshot until
-fit to the quota.
 
 # INCLUDED TOOLS
 
@@ -103,7 +140,7 @@ setting a _period_ in command line.
 
 ## ssmk
 
-Takes a source soubvolume and creates a snapshot and a destination
+Takes a source subvolume and creates a snapshot and a destination
 directory (called pool), where previous snapshots were stored.
 
 Checks if the last snapshot in such pool is enough old and if there
@@ -113,11 +150,11 @@ The snapshot name is automatically set in the `date` format
 **`+%Y-%m-%d_%H-%M-%S`**.
 
     Usage:
-            ssmk [-h] [-v] -p dir -q quota -f freq
+            ssmk [-h] [-v] -s subvolume -p pool -f freq
 
     Options:
-            -i subv      Set the subvolume.
-            -o dir       Set the output directory.
+            -s subvolume Set the source subvolume.
+            -p pool      Set the destination pool.
             -f freq      Set the frequency.
 
             -h           Show this help and exit.
@@ -126,13 +163,14 @@ The snapshot name is automatically set in the `date` format
 ## sscl
 
 Takes a pool directory and checks if there are more snapshots than
-indicated as maximum by the quota. If then, deletes the oldest snapshots until the quota is met.
+indicated as maximum by the quota. If then, deletes the oldest snapshots until
+the quota is met.
 
     Usage:
-            sscl [-h] [-v] -p dir -q quota
+            sscl [-h] [-v] -p pool -q quota
 
     Options:
-            -p dir       Set the output directory.
+            -p dir       Set the pool directory.
             -q quota     Set the quota.
 
             -h           Show this help and exit.
