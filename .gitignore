@@ -7,6 +7,8 @@ PKGBUILD
 *.gz
 sskit*/
 sskit.tar.xz
+dist/dinit/copyright
+dist/systemd/copyright
 
 # Swap files
 *.kate-swp
