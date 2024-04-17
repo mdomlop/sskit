@@ -37,13 +37,9 @@ ELFS = $(addsuffix .elf,$(addprefix source/,$(BINARIES)))
 
 
 default: elf zman
-debug: elf_debug
 
-all_opti: elf_opti
-all_static: elf_static
-all_opti_static: elf_opti_static
-all_bin: default all_opti all_static all_opti_static debug
-all_pkg: pkg_arch pkg_debian pkg_ocs pkg_termux
+all_bin: default
+all_pkg: pkg_arch pkg_debian pkg_ocs dist
 all: all_bin all_pkg
 
 elf: $(ELFS)
