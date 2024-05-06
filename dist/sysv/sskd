@@ -1,124 +1,70 @@
 #!/bin/sh
+
 ### BEGIN INIT INFO
 # Provides:          sskd
-# Required-Start:    $local_fs $network $remote_fs
-# Required-Stop:     $local_fs $network $remote_fs
-# Should-Start:      autofs
-# Should-Stop:       autofs
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: sskd
-# Description:       sskd, make snapshots.
+# Short-Description: SnapshotKit daemon
 ### END INIT INFO
 
-# Authors: Manuel Domínguez López <mdomlop@gmail.com>
+# Ruta al ejecutable de sskd
+DAEMON_BIN=/usr/bin/sskd
+LOGFILE=/var/log/sskd.log
+PIDFILE=/run/sskd.pid
+DAEMON=sskd
+DESC="Snapshot manager"
 
-# Do NOT "set -e"
-
-umask 0022
-
-# PATH should only include /usr/* if it runs after the mountnfs.sh script
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="SnapShotKit daemon"
-NAME=sskd
-DAEMON=/usr/bin/sskd
-PIDFILE=/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
-
-# Defaults (could be overridden in /etc/default/$NAME)
-LOGFILE=/var/log/$NAME/sskd.log
-USER=root
-GROUP=root
-
-# Exit if the package is not installed
-[ -x "$DAEMON" ] || exit 0
-
-# Load the VERBOSE setting and other rcS variables
-. /lib/init/vars.sh
-
-# Define LSB log_* functions.
-# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
-# and status_of_proc is working.
-. /lib/lsb/init-functions
-
-#
-# Function that starts the daemon/service
-#
-do_start()
-{
-	# Return
-	#   0 if daemon has been started
-	#   1 if daemon was already running
-	#   2 if daemon could not be started
-	mkdir -p "$(dirname "$LOGFILE")" && chown $USER:$GROUP "$(dirname "$LOGFILE")" || return 2
-	mkdir -p "$(dirname "$PIDFILE")" && chown $USER:$GROUP "$(dirname "$PIDFILE")" || return 2
-
-	start-stop-daemon --start --background --quiet --pidfile $PIDFILE --chuid $USER:$GROUP --exec $DAEMON --test || return 1
-	start-stop-daemon --start --background --pidfile $PIDFILE --chuid $USER:$GROUP --exec $DAEMON >> $LOGFILE || return 2
+# Función para iniciar el servicio
+start() {
+    echo "Starting $DESC: $DAEMON..."
+    $DAEMON_BIN $DAEMON_OPTS >> $LOGFILE 2>&1 & echo -n $! > $PIDFILE
 }
 
-#
-# Function that stops the daemon/service
-#
-do_stop()
-{
-	# Return
-	#   0 if daemon has been stopped
-	#   1 if daemon was already stopped
-	#   2 if daemon could not be stopped
-	#   other if a failure occurred
-	start-stop-daemon --stop --retry=TERM/30/KILL/5 --pidfile $PIDFILE --exec $DAEMON
-	RETVAL="$?"
-	[ "$RETVAL" = 2 ] && return 2
-	# Many daemons don't delete their pidfiles when they exit.
-	rm -f $PIDFILE
-	return "$RETVAL"
+# Función para detener el servicio
+stop() {
+    echo "Stopping $DESC: $DAEMON..."
+    pkill --pidfile $PIDFILE && rm $PIDFILE
 }
 
+# Función para reiniciar el servicio
+restart() {
+    stop
+    start
+}
+
+# Función para verificar el estado del servicio
+status() {
+    if pgrep -F "$PIDFILE" > /dev/null
+    then
+	    pid=$(cat $PIDFILE)
+	    echo "$DAEMON is running. PID: $pid."
+	    ps -p $pid -o %cpu,%mem
+
+    else
+        echo "$DAEMON is not running."
+    fi
+}
+
+# Evaluamos los argumentos del script
 case "$1" in
-  start)
-	#[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
-	log_daemon_msg "Starting $DESC" "$NAME"
-	do_start
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-	esac
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    status)
+		status
 	;;
-  stop)
-	#[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
-	log_daemon_msg "Stopping $DESC" "$NAME"
-	do_stop
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-	esac
-	;;
-  status)
-	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
-	;;
-  restart)
-	log_daemon_msg "Restarting $DESC" "$NAME"
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
-		esac
-		;;
-	  *)
-		# Failed to stop
-		log_end_msg 1
-		;;
-	esac
-	;;
-  *)
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart}" >&2
-	exit 3
-	;;
+    *)
+        echo "Uso: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
 esac
 
-:
+exit 0
