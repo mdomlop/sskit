@@ -128,6 +128,7 @@ void commands(char *subv, char *pool, char *freq, char *quota)
 {
 	char cmd_mk[PATH_MAX];
 	char cmd_cl[PATH_MAX];
+	int sysret = 0;
 
 	strcpy(cmd_mk, "ssmk -s ");
 	strcat(cmd_mk, subv);
@@ -137,7 +138,8 @@ void commands(char *subv, char *pool, char *freq, char *quota)
 	strcat(cmd_mk, freq);
 
 	//printf("\n%s\n", cmd_mk);
-	system(cmd_mk);
+	sysret = system(cmd_mk);
+	if (sysret) fprintf(stderr, "Fallo al ejecutar: %s\n", cmd_mk);
 
 	sleep(1);  // A short breath. Maybe not necessary
 
@@ -147,7 +149,8 @@ void commands(char *subv, char *pool, char *freq, char *quota)
 	strcat(cmd_cl, quota);
 
 	//printf("\n%s\n", cmd_cl);
-	system(cmd_cl);
+	sysret = system(cmd_cl);
+	if (sysret) fprintf(stderr, "Fallo al ejecutar: %s\n", cmd_cl);
 }
 
 void runconfig(void)
