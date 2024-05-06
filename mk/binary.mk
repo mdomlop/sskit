@@ -72,8 +72,8 @@ install_bin_dir:
 
 uninstall:
 	rm -f $(INSTALLED_BINARIES)
-	rm -f $(INSTALLED_DOCS)
-	rm -f $(INSTALLED_LICENSE)
+	rm -rf $(dir $(INSTALLED_DOCS))
+	rm -rf $(dir $(INSTALLED_LICENSE))
 
 clean: clean_arch clean_debian clean_ocs clean_man clean_dinit clean_systemd
 	rm -f $(ELFS)
