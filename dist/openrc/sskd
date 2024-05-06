@@ -1,0 +1,14 @@
+#!/sbin/openrc-run
+
+#NB: Config is in /etc/sstab
+
+supervisor="supervise-daemon"
+command=/usr/bin/sskd
+pidfile=/run/${RC_SVCNAME}.pid
+description="Snapshot manager"
+
+depend() {
+        need localmount
+        use logger
+}
+
