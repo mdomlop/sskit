@@ -29,8 +29,8 @@ $(GENTOOPKG):
 	echo 'make install DESTDIR=$$pkgdir' >> $@
 	echo '}' >> $@
 
-pkg_gentoo: $(ARCHPKG)
-$(ARCHPKG): PKGBUILD makefile sskd $(HEADERS)
+pkg_gentoo: $(GENTOOPKG)
+$(GENTOOPKG): PKGBUILD makefile sskd $(HEADERS)
 	makepkg -df PKGDEST=./ BUILDDIR=./ PKGEXT='$(PKGEXT)'
 	@echo
 	@echo Package done!

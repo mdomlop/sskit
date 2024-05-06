@@ -78,6 +78,6 @@ uninstall:
 clean: clean_arch clean_debian clean_ocs clean_man clean_dinit clean_systemd
 	rm -f $(ELFS)
 
-purge: clean purge_arch purge_debian purge_ocs purge_dinit purge_systemd
+purge: clean purge_arch purge_debian purge_gentoo purge_ocs purge_dinit purge_systemd purge_openrc
 
 .PHONY: clean arch_clean uninstall
