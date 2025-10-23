@@ -1,3 +1,4 @@
+# Need: libbtrfsutil-dev
 SOURCES = source/sskd.c source/ssmk.c source/sscl.c source/ssct.c source/ssls.c
 HEADERS = source/sskit.h
 

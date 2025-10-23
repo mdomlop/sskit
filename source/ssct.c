@@ -44,11 +44,11 @@ int check_is_subvol(char *subvol)
     if (!err)
         return 1;
     else if (err == BTRFS_UTIL_ERROR_NOT_BTRFS)
-        printf("Is not on a Btrfs filesystem: %s\n", subvol);
+        fprintf(stderr, "Is not on a Btrfs filesystem: %s\n", subvol);
     else if (err == BTRFS_UTIL_ERROR_NOT_SUBVOLUME)
-        printf("Is not a subvolume: %s\n", subvol);
+        fprintf(stderr, "Is not a subvolume: %s\n", subvol);
 	else
-		printf("Does not exist: %s\n", subvol);
+		fprintf(stderr, "Does not exist: %s\n", subvol);
 
     return 0;
 }

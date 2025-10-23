@@ -1,6 +1,10 @@
 sskit
 =====
 
+## 0.8.4b (2025-10-23)
+
+- `ssct`: Print messages to stderr if arg[1] is not a subvolume.
+
 ## 0.8.3b (2024-04-16)
 
 - System V init support.

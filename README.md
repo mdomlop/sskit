@@ -37,40 +37,67 @@ passed, a new snapshot of the _subvolume_ will be created inside of its own
 _pool_, until reach the _quota_, and then, when quota were overpassed, it will
 deletes the oldest snapshot until fit to the quota.
 
+Included commands
+-----------------
 
-sskd
------
+### sskd
 
 Is the daemon. Loads `/etc/sstab` into memory and runs first `ssmk` and then
 `sscl` for each line.
 
-ssmk
------
+### ssmk
+
 Creates a snapshot of the subvolume in the specified directory, only if the
 minimum frequency time is met. And only if there have been changes. The
 snapshot name is automatically set in the format **`+%Y-%m-%d_%H-%M-%S`**.
 
 
-sscl
------
+### sscl
 
 Delete the oldest snapshots until the quota is met.
 
-ssct
------
+### ssct
 
 Shows when subvolume was created and when an inode in the subvolume was last
 change.
 
-ssst
------
+### ssst
 
-Show snapshot statistics (Not implemented yet).
+Show snapshot statistics (_not implemented yet_).
 
 ---
+
+Compilation
+-----------
+
+Yout need libbtrfsutil. It is the only dependency.
+
+For install in Debian 13 run:
+
+	apt install libbtrfsutil-dev
+
+Other distributions may have a similar name for it.
+
+### Installation
+
+Once you have it in your system, run:
+
+	make && make install
+
+### Packaging
+
+For Debian GNU/Linux:
+
+	make pkg_debian
+
+For Arch Linux:
+
+	make pkg_arch
+
 _TODO_
------
+------
 
 - System calls.
 
+Compilation
 See [changelog](https://github.com/mdomlop/sskit/blob/main/changelog.md)
